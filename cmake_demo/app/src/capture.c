@@ -29,6 +29,9 @@
 
 #include <linux/videodev2.h>
 
+#include <pthread.h>
+#include <capture.h>
+
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
 enum io_method {
@@ -50,6 +53,10 @@ static unsigned int     n_buffers;
 static int              out_buf;
 static int              force_format = 0;
 static int              frame_count = 100;
+
+static unsigned int loopIsInfinite = 1;
+pthread_t captureThreadID;
+
 
 static void errno_exit(const char *s)
 {
@@ -172,13 +179,14 @@ static int read_frame(void)
 
 static void mainloop(void)
 {
-        unsigned int count;
-	unsigned int loopIsInfinite = 0;
+        // unsigned int count;
+	// unsigned int loopIsInfinite = 0;
 
-        if (frame_count == 0) loopIsInfinite = 1; //infinite loop
-	count = frame_count;
+        // if (frame_count == 0) loopIsInfinite = 1; //infinite loop
+	// count = frame_count;
 
-        while ((count-- > 0) || loopIsInfinite) {
+        // while ((count-- > 0) || loopIsInfinite) {
+        while (loopIsInfinite) {
                 for (;;) {
                         fd_set fds;
                         struct timeval tv;
@@ -491,14 +499,14 @@ static void init_device(void)
 	fprintf(stderr, "Force Format %d\n", force_format);
         if (force_format) {
 		if (force_format==2){
-             		// fmt.fmt.pix.width       = 1920;     
+             	    // fmt.fmt.pix.width       = 1920;     
                     // fmt.fmt.pix.height      = 1080;  
                     // fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_H264;
-                	// fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
-                    fmt.fmt.pix.width       = 1280;     
-                    fmt.fmt.pix.height      = 7200;  
+                    // fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
+                    fmt.fmt.pix.width       = 720;     
+                    fmt.fmt.pix.height      = 480;  
                     fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
-                	fmt.fmt.pix.field       = V4L2_FIELD_NONE;
+                fmt.fmt.pix.field       = V4L2_FIELD_NONE;
 		}
 		else if(force_format==1){
 			fmt.fmt.pix.width	= 640;
@@ -551,6 +559,7 @@ static void close_device(void)
 static void open_device(void)
 {
         struct stat st;
+        // dev_name ="/dev/video0";
 
         if (-1 == stat(dev_name, &st)) {
                 fprintf(stderr, "Cannot identify '%s': %d, %s\n",
@@ -572,7 +581,8 @@ static void open_device(void)
         }
 }
 
-static void usage(FILE *fp, int argc, char **argv)
+// static void usage(FILE *fp, int argc, char **argv)
+static void usage(FILE *fp, char **argv)
 {
         fprintf(fp,
                  "Usage: %s [options]\n\n"
@@ -591,9 +601,6 @@ static void usage(FILE *fp, int argc, char **argv)
 		 "Example usage: capture -F -o -c 300 > output.raw\n"
 		 "Captures 300 frames of H264 at 1920x1080 - use raw2mpg4 script to convert to mpg4\n",
                  argv[0], dev_name, frame_count);
-        // int *x = &argc;
-        // x = NULL;
-        // return x;
 }
 
 static const char short_options[] = "d:hmruofFc:";
@@ -607,13 +614,18 @@ long_options[] = {
         { "userp",  no_argument,       NULL, 'u' },
         { "output", no_argument,       NULL, 'o' },
         { "format", no_argument,       NULL, 'f' },
-	    { "formatH264", no_argument,   NULL, 'F' },
+	{ "formatH264", no_argument,   NULL, 'F' },
         { "count",  required_argument, NULL, 'c' },
         { 0, 0, 0, 0 }
 };
 
-int main(int argc, char **argv)
+void* run_capture(void* args)
+// void run_capture(int argc, char **argv)
 {
+        argsList arguments = *(argsList *) args;
+        int argc = arguments.argc;
+        char** argv = arguments.argv;
+        
         dev_name = "/dev/video0";
 
         for (;;) {
@@ -635,7 +647,7 @@ int main(int argc, char **argv)
                         break;
 
                 case 'h':
-                        usage(stdout, argc, argv);
+                        usage(stdout, argv);
                         exit(EXIT_SUCCESS);
 
                 case 'm':
@@ -670,7 +682,7 @@ int main(int argc, char **argv)
                         break;
 
                 default:
-                        usage(stderr, argc, argv);
+                        usage(stderr, argv);
                         exit(EXIT_FAILURE);
                 }
         }
@@ -683,5 +695,21 @@ int main(int argc, char **argv)
         uninit_device();
         close_device();
         fprintf(stderr, "\n");
-        return 0;
+        // return 0;
+        return NULL;
+}
+
+void captureThread_init(int argc, char **argv)
+{       
+        argsList args;
+        args.argc = argc;
+        args.argv = argv;
+        loopIsInfinite = 1;
+        pthread_create(&captureThreadID, NULL, run_capture, &args);
+}
+
+void captureThread_cleanup(void)
+{
+        loopIsInfinite = 0;
+        pthread_join(captureThreadID, NULL);
 }
