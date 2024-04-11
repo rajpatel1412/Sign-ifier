@@ -7,6 +7,11 @@ DATA_DIR = './data'
 if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)
 
+
+# TODO: formally define all of the symbols that you are going to use,
+# and collect a final set of images for it. Try the full alphabet and
+# the words you selected; if that works poorly just do a few letters
+# and the phrases.
 number_of_classes = 3
 dataset_size = 100
 
