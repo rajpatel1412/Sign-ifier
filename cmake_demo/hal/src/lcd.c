@@ -32,16 +32,16 @@ void runCommand(char command[])
     }
 }
 
-static void sleepForMs(long long delayInMs)
-{
-    const long long NS_PER_MS = 1000 * 1000;
-    const long long NS_PER_SECOND = 1000000000;
-    long long delayNs = delayInMs * NS_PER_MS;
-    int seconds = delayNs / NS_PER_SECOND;
-    int nanoseconds = delayNs % NS_PER_SECOND;
-    struct timespec reqDelay = {seconds, nanoseconds};
-    nanosleep(&reqDelay, (struct timespec *) NULL);
-}
+// static void sleepForMs(long long delayInMs)
+// {
+//     const long long NS_PER_MS = 1000 * 1000;
+//     const long long NS_PER_SECOND = 1000000000;
+//     long long delayNs = delayInMs * NS_PER_MS;
+//     int seconds = delayNs / NS_PER_SECOND;
+//     int nanoseconds = delayNs % NS_PER_SECOND;
+//     struct timespec reqDelay = {seconds, nanoseconds};
+//     nanosleep(&reqDelay, (struct timespec *) NULL);
+// }
 
 void *lcdThread(void *arg) {
     while(lcd_loopCondition) {
@@ -61,12 +61,12 @@ void lcd_display(const char* toDisplay)
     strncpy(message, toDisplay, sizeof(toDisplay) - 1);
     message[sizeof(message) - 1] = '\0';
     
-    char command[4096];
-    snprintf(command, 4096, "espeak \'%s\' -w test.wav", message);
-    printf("command: %s", command);
-    runCommand(command);
-    sleepForMs(1000);
-    runCommand("aplay test.wav");
+    // char command[4096];
+    // snprintf(command, 4096, "espeak \'%s\' -w test.wav", message);
+    // printf("command: %s", command);
+    // runCommand(command);
+    // sleepForMs(1000);
+    // runCommand("aplay test.wav");
     
     isDisplaying = true;
 }
