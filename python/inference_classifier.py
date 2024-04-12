@@ -36,7 +36,7 @@ labels_dict = {
 
 import socket
 
-UDP_IP = "127.0.0.1"
+UDP_IP = "192.168.7.1"
 UDP_PORT = 12345
 
 
