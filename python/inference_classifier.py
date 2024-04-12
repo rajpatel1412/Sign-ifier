@@ -37,7 +37,7 @@ labels_dict = {
 import socket
 
 UDP_IP = "127.0.0.1"
-UDP_PORT = 42069
+UDP_PORT = 12345
 
 
 sock = socket.socket(socket.AF_INET, # Internet
