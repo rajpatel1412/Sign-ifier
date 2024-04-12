@@ -111,12 +111,12 @@ app/clean: app/CMakeFiles/webcam_capture.dir/clean
 app/CMakeFiles/webcam_capture.dir/all:
 	$(MAKE) $(MAKESILENT) -f app/CMakeFiles/webcam_capture.dir/build.make app/CMakeFiles/webcam_capture.dir/depend
 	$(MAKE) $(MAKESILENT) -f app/CMakeFiles/webcam_capture.dir/build.make app/CMakeFiles/webcam_capture.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles --progress-num=1,2,3 "Built target webcam_capture"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles --progress-num=1,2,3,4 "Built target webcam_capture"
 .PHONY : app/CMakeFiles/webcam_capture.dir/all
 
 # Build rule for subdir invocation for target.
 app/CMakeFiles/webcam_capture.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles 4
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 app/CMakeFiles/webcam_capture.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles 0
 .PHONY : app/CMakeFiles/webcam_capture.dir/rule

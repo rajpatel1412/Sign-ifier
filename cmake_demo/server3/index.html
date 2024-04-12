@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Sign-ifier Stream</title>
+	<meta charset="UTF-8">
+</head>
+    <img id='image'>
+    <script> src="https://cdnjs.cloudfare.com/ajax/libs/socket.io/2.1.1/socket.io.js"</script>
+    <script>
+        const socket = io.connect('http://localhost:3000');
+        socket.on('image', function(data) {
+            console.log('data', data);
+        });
+    </script>
+<body>
+	
+</body>

@@ -31,6 +31,7 @@
 
 #include <pthread.h>
 #include <capture.h>
+#include <udp_handler.h>
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
@@ -77,11 +78,13 @@ static int xioctl(int fh, int request, void *arg)
 
 static void process_image(const void *p, int size)
 {
-        if (out_buf)
-                fwrite(p, size, 1, stdout);
+        if (out_buf) {
+                // fwrite(p, size, 1, stdout);
+                sendResponse(p, size);
+        }
 
         fflush(stderr);
-        fprintf(stderr, ".");
+        // fprintf(stderr, ".");
         fflush(stdout);
 }
 
@@ -179,13 +182,6 @@ static int read_frame(void)
 
 static void mainloop(void)
 {
-        // unsigned int count;
-	// unsigned int loopIsInfinite = 0;
-
-        // if (frame_count == 0) loopIsInfinite = 1; //infinite loop
-	// count = frame_count;
-
-        // while ((count-- > 0) || loopIsInfinite) {
         while (loopIsInfinite) {
                 for (;;) {
                         fd_set fds;
@@ -499,10 +495,6 @@ static void init_device(void)
 	fprintf(stderr, "Force Format %d\n", force_format);
         if (force_format) {
 		if (force_format==2){
-             	    // fmt.fmt.pix.width       = 1920;     
-                    // fmt.fmt.pix.height      = 1080;  
-                    // fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_H264;
-                    // fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
                     fmt.fmt.pix.width       = 720;     
                     fmt.fmt.pix.height      = 480;  
                     fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
@@ -581,111 +573,15 @@ static void open_device(void)
         }
 }
 
-// static void usage(FILE *fp, int argc, char **argv)
-static void usage(FILE *fp, char **argv)
-{
-        fprintf(fp,
-                 "Usage: %s [options]\n\n"
-                 "Version 1.3\n"
-                 "Options:\n"
-                 "-d | --device name   Video device name [%s]\n"
-                 "-h | --help          Print this message\n"
-                 "-m | --mmap          Use memory mapped buffers [default]\n"
-                 "-r | --read          Use read() calls\n"
-                 "-u | --userp         Use application allocated buffers\n"
-                 "-o | --output        Outputs stream to stdout\n"
-                 "-f | --format        Force format to 640x480 YUYV\n"
-		 "-F | --formatH264    Force format to 1920x1080 H264\n"
-                 "-c | --count         Number of frames to grab [%i] - use 0 for infinite\n"
-                 "\n"
-		 "Example usage: capture -F -o -c 300 > output.raw\n"
-		 "Captures 300 frames of H264 at 1920x1080 - use raw2mpg4 script to convert to mpg4\n",
-                 argv[0], dev_name, frame_count);
-}
 
-static const char short_options[] = "d:hmruofFc:";
+void* run_capture(void* args) {
 
-static const struct option
-long_options[] = {
-        { "device", required_argument, NULL, 'd' },
-        { "help",   no_argument,       NULL, 'h' },
-        { "mmap",   no_argument,       NULL, 'm' },
-        { "read",   no_argument,       NULL, 'r' },
-        { "userp",  no_argument,       NULL, 'u' },
-        { "output", no_argument,       NULL, 'o' },
-        { "format", no_argument,       NULL, 'f' },
-	{ "formatH264", no_argument,   NULL, 'F' },
-        { "count",  required_argument, NULL, 'c' },
-        { 0, 0, 0, 0 }
-};
-
-void* run_capture(void* args)
-// void run_capture(int argc, char **argv)
-{
-        argsList arguments = *(argsList *) args;
-        int argc = arguments.argc;
-        char** argv = arguments.argv;
-        
+        Socket_init();
         dev_name = "/dev/video0";
 
-        for (;;) {
-                int idx;
-                int c;
-
-                c = getopt_long(argc, argv,
-                                short_options, long_options, &idx);
-
-                if (-1 == c)
-                        break;
-
-                switch (c) {
-                case 0: /* getopt_long() flag */
-                        break;
-
-                case 'd':
-                        dev_name = optarg;
-                        break;
-
-                case 'h':
-                        usage(stdout, argv);
-                        exit(EXIT_SUCCESS);
-
-                case 'm':
-                        io = IO_METHOD_MMAP;
-                        break;
-
-                case 'r':
-                        io = IO_METHOD_READ;
-                        break;
-
-                case 'u':
-                        io = IO_METHOD_USERPTR;
-                        break;
-
-                case 'o':
-                        out_buf++;
-                        break;
-
-                case 'f':
-                        force_format=1;
-                        break;
-
-		case 'F':
-			force_format=2;
-			break;
-
-                case 'c':
-                        errno = 0;
-                        frame_count = strtol(optarg, NULL, 0);
-                        if (errno)
-                                errno_exit(optarg);
-                        break;
-
-                default:
-                        usage(stderr, argv);
-                        exit(EXIT_FAILURE);
-                }
-        }
+        force_format = 2;
+        out_buf++;
+        frame_count = 0;
 
         open_device();
         init_device();
@@ -695,17 +591,16 @@ void* run_capture(void* args)
         uninit_device();
         close_device();
         fprintf(stderr, "\n");
+        Socket_cleanup();
         // return 0;
-        return NULL;
+        return args;
 }
 
-void captureThread_init(int argc, char **argv)
+
+void captureThread_init()
 {       
-        argsList args;
-        args.argc = argc;
-        args.argv = argv;
         loopIsInfinite = 1;
-        pthread_create(&captureThreadID, NULL, run_capture, &args);
+        pthread_create(&captureThreadID, NULL, run_capture, NULL);
 }
 
 void captureThread_cleanup(void)

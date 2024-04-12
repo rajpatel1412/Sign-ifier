@@ -198,6 +198,33 @@ src/main.c.s:
 	cd /home/raj/cmpt433/work/project/Sign-ifier/build && $(MAKE) $(MAKESILENT) -f app/CMakeFiles/webcam_capture.dir/build.make app/CMakeFiles/webcam_capture.dir/src/main.c.s
 .PHONY : src/main.c.s
 
+src/udp_handler.o: src/udp_handler.c.o
+
+.PHONY : src/udp_handler.o
+
+# target to build an object file
+src/udp_handler.c.o:
+	cd /home/raj/cmpt433/work/project/Sign-ifier/build && $(MAKE) $(MAKESILENT) -f app/CMakeFiles/webcam_capture.dir/build.make app/CMakeFiles/webcam_capture.dir/src/udp_handler.c.o
+.PHONY : src/udp_handler.c.o
+
+src/udp_handler.i: src/udp_handler.c.i
+
+.PHONY : src/udp_handler.i
+
+# target to preprocess a source file
+src/udp_handler.c.i:
+	cd /home/raj/cmpt433/work/project/Sign-ifier/build && $(MAKE) $(MAKESILENT) -f app/CMakeFiles/webcam_capture.dir/build.make app/CMakeFiles/webcam_capture.dir/src/udp_handler.c.i
+.PHONY : src/udp_handler.c.i
+
+src/udp_handler.s: src/udp_handler.c.s
+
+.PHONY : src/udp_handler.s
+
+# target to generate assembly for a file
+src/udp_handler.c.s:
+	cd /home/raj/cmpt433/work/project/Sign-ifier/build && $(MAKE) $(MAKESILENT) -f app/CMakeFiles/webcam_capture.dir/build.make app/CMakeFiles/webcam_capture.dir/src/udp_handler.c.s
+.PHONY : src/udp_handler.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -213,6 +240,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/udp_handler.o"
+	@echo "... src/udp_handler.i"
+	@echo "... src/udp_handler.s"
 .PHONY : help
 
 

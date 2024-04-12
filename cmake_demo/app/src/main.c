@@ -17,11 +17,13 @@
 //     nanosleep(&reqDelay, (struct timespec *) NULL);
 // }
 
-int main(int argc, char **argv)
+// int main(int argc, char **argv)
+int main()
 {
-        captureThread_init(argc, argv);
+        captureThread_init();
         // sleepForMs(10000);
         // printf("/n/n---------------------------Ending Sleep-----------------------------/n/n");
+        // captureThread_cleanup();
         bool shutdown = false;
         while(true) {
                 if(shutdown) {
