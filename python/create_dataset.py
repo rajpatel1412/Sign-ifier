@@ -44,6 +44,10 @@ for dir_ in os.listdir(DATA_DIR):
 
             data.append(data_aux)
             labels.append(dir_)
+            # print(len(dir_))
+
+print(len(data))
+print(len(labels))
 
 f = open('data.pickle', 'wb')
 pickle.dump({'data': data, 'labels': labels}, f)
