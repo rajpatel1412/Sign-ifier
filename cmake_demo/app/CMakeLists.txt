@@ -17,23 +17,11 @@ target_link_libraries(webcam_capture LINK_PRIVATE Threads::Threads)
 add_custom_command(TARGET webcam_capture POST_BUILD 
   COMMAND "${CMAKE_COMMAND}" -E copy 
      "$<TARGET_FILE:webcam_capture>"
-     "~/cmpt433/public/myApps/project/webcam_capture" 
+     "~/cmpt433/public/myApps/project_test2/webcam_capture" 
   COMMENT "Copying ARM executable to public NFS directory")
 
 add_custom_command(TARGET webcam_capture POST_BUILD 
   COMMAND "${CMAKE_COMMAND}" -E copy_directory
      "${CMAKE_SOURCE_DIR}/server"
-     "$(HOME)/cmpt433/public/myApps/project/server-files/" 
-  COMMENT "Copying server to public NFS directory")
-
-add_custom_command(TARGET webcam_capture POST_BUILD 
-  COMMAND "${CMAKE_COMMAND}" -E copy_directory
-     "${CMAKE_SOURCE_DIR}/server2"
-     "$(HOME)/cmpt433/public/myApps/project/server-files2/" 
-  COMMENT "Copying server to public NFS directory")
-
-  add_custom_command(TARGET webcam_capture POST_BUILD 
-  COMMAND "${CMAKE_COMMAND}" -E copy_directory
-     "${CMAKE_SOURCE_DIR}/server3"
-     "$(HOME)/cmpt433/public/myApps/project/server-files3/" 
+     "$(HOME)/cmpt433/public/myApps/project_test2/server-files/" 
   COMMENT "Copying server to public NFS directory")

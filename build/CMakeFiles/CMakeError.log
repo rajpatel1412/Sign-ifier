@@ -1,0 +1,42 @@
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_6e934/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_6e934.dir/build.make CMakeFiles/cmTC_6e934.dir/build
+gmake[1]: Entering directory '/home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_6e934.dir/src.c.o
+/usr/bin/arm-linux-gnueabihf-gcc   -DCMAKE_HAVE_LIBC_PTHREAD -std=gnu11 -o CMakeFiles/cmTC_6e934.dir/src.c.o -c /home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_6e934
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6e934.dir/link.txt --verbose=1
+/usr/bin/arm-linux-gnueabihf-gcc  -DCMAKE_HAVE_LIBC_PTHREAD CMakeFiles/cmTC_6e934.dir/src.c.o -o cmTC_6e934 
+/usr/lib/gcc-cross/arm-linux-gnueabihf/10/../../../../arm-linux-gnueabihf/bin/ld: CMakeFiles/cmTC_6e934.dir/src.c.o: in function `main':
+src.c:(.text+0x26): undefined reference to `pthread_create'
+/usr/lib/gcc-cross/arm-linux-gnueabihf/10/../../../../arm-linux-gnueabihf/bin/ld: src.c:(.text+0x2e): undefined reference to `pthread_detach'
+/usr/lib/gcc-cross/arm-linux-gnueabihf/10/../../../../arm-linux-gnueabihf/bin/ld: src.c:(.text+0x36): undefined reference to `pthread_cancel'
+/usr/lib/gcc-cross/arm-linux-gnueabihf/10/../../../../arm-linux-gnueabihf/bin/ld: src.c:(.text+0x40): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_6e934.dir/build.make:106: cmTC_6e934] Error 1
+gmake[1]: Leaving directory '/home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_6e934/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_cancel(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
