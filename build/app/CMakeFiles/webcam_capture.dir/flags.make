@@ -6,5 +6,5 @@ C_DEFINES =
 
 C_INCLUDES = -I/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/include
 
-C_FLAGS = -g -g -Wall -Werror -Wpedantic -Wextra -lv4l2 -fdiagnostics-color -fsanitize=address -std=gnu11
+C_FLAGS = -g -g -Wall -Werror -Wpedantic -Wextra -lv4l2 -fdiagnostics-color -fsanitize=address -pthread -std=gnu11
 

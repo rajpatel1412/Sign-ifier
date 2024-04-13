@@ -194,3 +194,17 @@ Parsed C implicit link information from above output:
   implicit fwks: []
 
 
+Determining if the include file pthread.h exists passed with the following output:
+Change Dir: /home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_6dc24/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_6dc24.dir/build.make CMakeFiles/cmTC_6dc24.dir/build
+gmake[1]: Entering directory '/home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_6dc24.dir/CheckIncludeFile.c.o
+/usr/bin/arm-linux-gnueabihf-gcc   -std=gnu11 -o CMakeFiles/cmTC_6dc24.dir/CheckIncludeFile.c.o -c /home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_6dc24
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6dc24.dir/link.txt --verbose=1
+/usr/bin/arm-linux-gnueabihf-gcc CMakeFiles/cmTC_6dc24.dir/CheckIncludeFile.c.o -o cmTC_6dc24 
+gmake[1]: Leaving directory '/home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles/CMakeTmp'
+
+
+
