@@ -1,1 +1,3 @@
 python/data/
+build/
+.vscode/

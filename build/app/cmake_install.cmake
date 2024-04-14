@@ -1,4 +1,4 @@
-# Install script for directory: /home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app
+# Install script for directory: /home/psalniko/cmpt433/work/Sign-ifier/cmake_demo/app
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

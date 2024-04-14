@@ -1,1 +1,0 @@
-/usr/bin/arm-linux-gnueabihf-gcc -g -fsanitize=address CMakeFiles/webcap_capture.dir/src/capture.c.o -o webcap_capture  -lhal 

@@ -4,15 +4,14 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/capture.c" "/home/raj/cmpt433/work/project/Sign-ifier/build/app/CMakeFiles/webcam_capture.dir/src/capture.c.o"
-  "/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/main.c" "/home/raj/cmpt433/work/project/Sign-ifier/build/app/CMakeFiles/webcam_capture.dir/src/main.c.o"
-  "/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/udp_handler.c" "/home/raj/cmpt433/work/project/Sign-ifier/build/app/CMakeFiles/webcam_capture.dir/src/udp_handler.c.o"
+  "/home/psalniko/cmpt433/work/Sign-ifier/cmake_demo/app/src/capture.c" "/home/psalniko/cmpt433/work/Sign-ifier/build/app/CMakeFiles/webcam_capture.dir/src/capture.c.o"
+  "/home/psalniko/cmpt433/work/Sign-ifier/cmake_demo/app/src/main.c" "/home/psalniko/cmpt433/work/Sign-ifier/build/app/CMakeFiles/webcam_capture.dir/src/main.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 
 # The include file search paths:
 set(CMAKE_C_TARGET_INCLUDE_PATH
-  "/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/include"
+  "/home/psalniko/cmpt433/work/Sign-ifier/cmake_demo/app/include"
   )
 
 # Targets to which this target links.
