@@ -1,4 +1,5 @@
 #include "capture.h"
+#include "udp_handler.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -20,8 +21,11 @@ static void sleepForMs(long long delayInMs)
 
 int main()
 {
+    
     capture_init();
+    sleepForMs(10000);
+    listenThread_init();
     while(true) {}
-    sleepForMs(2000);
     capture_cleanup();
+    listenThread_cleanup();
 }

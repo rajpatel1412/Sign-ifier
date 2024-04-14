@@ -1,41 +1,42 @@
-# import cv2, socket, numpy, pickle
-
-# s=socket.socket(socket.AF_INET , socket.SOCK_DGRAM)  # Gives UDP protocol to follow
-# # ip="192.168.7.2"   # Server public IP
-# ip="0.0.0.0"
-# port=12345             # Server Port Number to identify the process that needs to recieve or send packets
-# s.bind((ip,port))     # Bind the IP:port to connect 
-
-# # In order to iterate over block of code as long as test expression is true
-# while True:
-#     # x=s.recvfrom(100000000)    # Recieve byte code sent by client using recvfrom
-#     x=s.recvfrom(65507)
-#     print("after recieve")
-#     clientip = x[1][0]         # x[1][0] in this client details stored,x[0][0] Client message Stored
-#     data=x[0]                  # Data sent by client
-#     data=pickle.loads(data)    # All byte code is converted to Numpy Code 
-#     data = cv2.imdecode(data, cv2.IMREAD_COLOR)  # Decode 
-#     cv2.imshow('my pic', data) # Show Video/Stream
-#     if cv2.waitKey(10) == 13:  # Press Enter then window will close
-#         break
-# cv2.destroyAllWindows()        # Close all windows
-
 import cv2
 import socket
+import threading
+import string
 
-sock = socket.socket(socket.AF_INET , socket.SOCK_DGRAM)  # Gives UDP protocol to follow
-ip="192.168.7.2"   # Server public IP
-# ip="0.0.0.0"
-port=3000             # Server Port Number to identify the process that needs to recieve or send packets
+sock = socket.socket(socket.AF_INET , socket.SOCK_DGRAM) 
+ip="192.168.7.2"   
+port=3000
+# answer = b''
+answer = 1
 # sock.bind((ip,port)) 
+
+def sendAnswer():
+     while(True):
+        sock.sendto(answer,(ip,port))
+        # print("sent")
+
+# replyThread = threading.Thread(target=sendAnswer)
+
+# replyThread.start()
 
 cap = cv2.VideoCapture("udp://192.168.7.1:12345")   
 while(True): 
     ret, frame = cap.read() 
     cv2.imshow('frame', frame) 
-    answer = 'answer'
-    answerBytes = answer.encode('utf-8')
-    sock.sendto(answerBytes,(ip,port))
+    # global answer 
+    # answer = b'answer'
+    answer = answer + 1
+    # answerString = b'answer = {answer}'
+    if(answer % 100 == 0):
+        answerString = str(answer).encode()
+        sock.sendto(answerString,(ip,port))
+    # answerBytes = answer.encode('utf-8')
+    # sock.sendto(answerBytes,(ip,port))
+
+    # sock = socket.socket(socket.AF_INET , socket.SOCK_DGRAM)
+    # sock.sendto(answer,(ip,port))
+    # sock.sendto(answerString,(ip,port))
+    # sock.close()
       
     # the 'q' button is set as the 
     # quitting button you may use any 
@@ -44,5 +45,7 @@ while(True):
         break
 cap.release() 
 cv2.destroyAllWindows() 
+
+# replyThread.join()
 
 

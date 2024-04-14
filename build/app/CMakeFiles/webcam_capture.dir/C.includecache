@@ -6,7 +6,57 @@
 
 #IncludeRegexTransform: 
 
+/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/include/capture.h
+
 /home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/include/udp_handler.h
+
+/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/capture.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+assert.h
+-
+getopt.h
+-
+fcntl.h
+-
+unistd.h
+-
+errno.h
+-
+sys/stat.h
+-
+sys/types.h
+-
+sys/time.h
+-
+sys/mman.h
+-
+sys/ioctl.h
+-
+linux/videodev2.h
+-
+udp_handler.h
+/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/udp_handler.h
+pthread.h
+-
+
+/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/main.c
+capture.h
+/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/capture.h
+udp_handler.h
+/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/udp_handler.h
+stdio.h
+-
+stdbool.h
+-
+stdlib.h
+-
+time.h
+-
 
 /home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/udp_handler.c
 stdio.h
@@ -48,5 +98,7 @@ stdbool.h
 arpa/inet.h
 -
 netdb.h
+-
+pthread.h
 -
 
