@@ -21,7 +21,7 @@ static void sleepForMs(long long delayInMs)
 int main()
 {
     capture_init();
-    // while(true) {}
+    while(true) {}
     sleepForMs(20000);
     capture_cleanup();
 }

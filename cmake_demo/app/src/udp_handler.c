@@ -27,6 +27,11 @@
 
 static struct sockaddr_in sinT;
 static struct sockaddr_in sinRemoteT;
+
+//
+static struct sockaddr_in sinRemotePyT;
+//
+
 static int socketDescriptorT;
 
 //Initialize UDP connection
@@ -40,9 +45,23 @@ void openConnectionT()
         socketDescriptorT = socket(PF_INET, SOCK_DGRAM, 0);
         bind(socketDescriptorT, (struct sockaddr*) &sinT, sizeof(sinT));
         
+        // nodejs server
         sinRemoteT.sin_family = AF_INET;
         sinRemoteT.sin_port = htons(RPORT_T);
+        //serving from BBG - very slow
+        // sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.2"); 
+
+        // for serving from host
         sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.1");
+
+        // python
+        sinRemotePyT.sin_family = AF_INET;
+        sinRemotePyT.sin_port = htons(RPORT_T);
+        //serving from BBG - very slow
+        // sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.2"); 
+
+        // for serving from host
+        sinRemotePyT.sin_addr.s_addr = inet_addr("192.168.7.1");
 }
 
 //Send video frame using udp packet
@@ -56,6 +75,13 @@ int sendResponseT(const void *str, int size)
                         (struct sockaddr *) &sinRemoteT, 
                         sizeof(sinRemoteT)
                   );
+        sendto(socketDescriptorT,
+                        str,
+                        size,
+                        0,
+                        (struct sockaddr *) &sinRemotePyT, 
+                        sizeof(sinRemotePyT)
+                  );
 
                 
         return packetSent;
@@ -66,3 +92,48 @@ void closeConnectionT()
 {
         close(socketDescriptorT);
 }
+
+
+
+
+// static struct sockaddr_in sinPyT;
+// static struct sockaddr_in sinRemotePyT;
+// static int socketDescriptorT;
+
+// //Initialize UDP connection
+// void openConnectionT() 
+// {
+//         memset(&sinT, 0, sizeof(sinT));
+//         sinT.sin_family = AF_INET;
+//         sinT.sin_addr.s_addr = htonl(INADDR_ANY);
+//         sinT.sin_port = htons(PORT_T);
+
+//         socketDescriptorT = socket(PF_INET, SOCK_DGRAM, 0);
+//         bind(socketDescriptorT, (struct sockaddr*) &sinT, sizeof(sinT));
+        
+//         sinRemoteT.sin_family = AF_INET;
+//         sinRemoteT.sin_port = htons(RPORT_T);
+//         sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.1");
+// }
+
+// //Send video frame using udp packet
+// int sendResponseT(const void *str, int size) 
+// {
+//         int packetSent = 0;
+//         sendto(socketDescriptorT,
+//                         str,
+//                         size,
+//                         0,
+//                         (struct sockaddr *) &sinRemoteT, 
+//                         sizeof(sinRemoteT)
+//                   );
+
+                
+//         return packetSent;
+// }
+
+// //Close udp connection
+// void closeConnectionT() 
+// {
+//         close(socketDescriptorT);
+// }
