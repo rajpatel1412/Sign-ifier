@@ -1,3 +1,10 @@
+// Outputs string to LCD and plays it as audio
+// Guide to get LCD working from
+// https://opencoursehub.cs.sfu.ca/bfraser/grav-cms/cmpt433/links/files/2022-student-howtos/16x2CharacterLCDThroughGPIO.pdf
+// Code referenced from
+// https://opencoursehub.cs.sfu.ca/bfraser/solutions/433/StudentHowToGuides/2022Files/16x2CharacterLCDThroughGPIO.zip
+// https://github.com/arduino-libraries/LiquidCrystal/blob/master/src/LiquidCrystal.cpp
+
 #ifndef _LCD_H_
 #define _LCD_H_
 

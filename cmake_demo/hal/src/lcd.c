@@ -32,16 +32,16 @@ void runCommand(char command[])
     }
 }
 
-// static void sleepForMs(long long delayInMs)
-// {
-//     const long long NS_PER_MS = 1000 * 1000;
-//     const long long NS_PER_SECOND = 1000000000;
-//     long long delayNs = delayInMs * NS_PER_MS;
-//     int seconds = delayNs / NS_PER_SECOND;
-//     int nanoseconds = delayNs % NS_PER_SECOND;
-//     struct timespec reqDelay = {seconds, nanoseconds};
-//     nanosleep(&reqDelay, (struct timespec *) NULL);
-// }
+static void sleepForMs(long long delayInMs)
+{
+    const long long NS_PER_MS = 1000 * 1000;
+    const long long NS_PER_SECOND = 1000000000;
+    long long delayNs = delayInMs * NS_PER_MS;
+    int seconds = delayNs / NS_PER_SECOND;
+    int nanoseconds = delayNs % NS_PER_SECOND;
+    struct timespec reqDelay = {seconds, nanoseconds};
+    nanosleep(&reqDelay, (struct timespec *) NULL);
+}
 
 void *lcdThread(void *arg) {
     while(lcd_loopCondition) {
@@ -60,14 +60,7 @@ void lcd_display(const char* toDisplay)
 {
     strncpy(message, toDisplay, sizeof(toDisplay) - 1);
     message[sizeof(message) - 1] = '\0';
-    
-    // char command[4096];
-    // snprintf(command, 4096, "espeak \'%s\' -w test.wav", message);
-    // printf("command: %s", command);
-    // runCommand(command);
-    // sleepForMs(1000);
-    // runCommand("aplay test.wav");
-    
+ 
     isDisplaying = true;
 }
 
@@ -77,17 +70,11 @@ void lcd_clear()
     GPIO_writeValue(RS_GPIO_NUMBER, "0");
 
     // Clear the display.
-    write4Bits(0x0); /* 0000 */
-    write4Bits(0x1); /* 0001 */
-    delayFor(0, 64000); // 64 us
+	write4Bits(0x0); /* 0000 */
+	write4Bits(0x1); /* 0001 */
+	delayFor(0, 64000); // 64 us
 
-    // Sets mode to increment cursor position by 1 and shift right when writing to display.
-    write4Bits(0x0); /* 0000 */
-    write4Bits(0x6); /* 0110 */
-    delayFor(0, 128000); // 128 us;
-
-    // Pull RS up to write data.
-    GPIO_writeValue(RS_GPIO_NUMBER, "1");
+	GPIO_writeValue(RS_GPIO_NUMBER, "1");
 }
 
 void initializeLCD()
@@ -152,7 +139,7 @@ void initializeLCD()
 	// To be able to see the cursor, use 0000 1110.
 	// To enable cursor blinking, use 0000 1111.
 	write4Bits(0x0); /* 0000 */
-	write4Bits(0xF); /* 1111 */
+	write4Bits(0xC); /* 1111 */
 	delayFor(0, 64000); // 64 us
 
     // printf("Completed initialization.\n");
@@ -165,7 +152,14 @@ void initializeLCD()
 
 void lcd_cleanup(void) 
 {
-    lcd_clear();
+    GPIO_writeValue(RS_GPIO_NUMBER, "0");
+   
+    write4Bits(0x0);
+	write4Bits(0x0);
+	delayFor(0, 64000);
+
+    GPIO_writeValue(RS_GPIO_NUMBER, "1");
+
     lcd_loopCondition = false;
     pthread_join(lcdThread_id, NULL);
 }
@@ -176,12 +170,13 @@ void writeMessage(char* msg)
     for (size_t i = 0; i < strlen(msg); i++) {
         writeChar(msg[i]);
     }
-    // char command[4096];
-    // snprintf(command, 4096, "espeak \'%s\' -w test.wav", msg);
+    char command[4096];
+    memset(command, 0, 4096 * sizeof(char));
+    snprintf(command, 4096, "espeak \'%s\' -w test.wav", msg);
     // printf("command: %s", command);
-    // runCommand(command);
-    // sleepForMs(1000);
-    // runCommand("aplay test.wav");
+    runCommand(command);
+    sleepForMs(500);
+    runCommand("aplay test.wav");
 }
 
 void writeChar(char c)
