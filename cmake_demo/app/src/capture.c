@@ -135,6 +135,7 @@ static void process_image(const void *p, int size)
 {
         if (out_buf) {
                 sendResponseT(p, size);
+                sendResponsePyT(p, size);
         }
 
         fflush(stderr);
@@ -248,6 +249,7 @@ static void mainloop(void)
                         fd_set fds;
                         struct timeval tv;
                         int r;
+                        // getAnswer();
 
                         FD_ZERO(&fds);
                         FD_SET(fd, &fds);

@@ -1,6 +1,3 @@
 {
-    "cmake.sourceDirectory": "/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo",
-    "files.associations": {
-        "cmath": "c"
-    }
+    "cmake.sourceDirectory": "/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo"
 }

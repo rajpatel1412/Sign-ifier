@@ -22,6 +22,6 @@ int main()
 {
     capture_init();
     while(true) {}
-    sleepForMs(20000);
+    sleepForMs(2000);
     capture_cleanup();
 }

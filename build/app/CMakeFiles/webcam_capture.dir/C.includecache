@@ -6,15 +6,9 @@
 
 #IncludeRegexTransform: 
 
-/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/include/capture.h
-
 /home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/include/udp_handler.h
-netinet/in.h
--
-stdbool.h
--
 
-/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/capture.c
+/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/udp_handler.c
 stdio.h
 -
 stdlib.h
@@ -43,35 +37,13 @@ sys/ioctl.h
 -
 linux/videodev2.h
 -
-pthread.h
--
-capture.h
--
-udp_handler.h
--
-
-/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/udp_handler.c
 udp_handler.h
 /home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/udp_handler.h
-capture.h
-/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/capture.h
-assert.h
--
-pthread.h
+sys/socket.h
 -
 netinet/in.h
 -
 stdbool.h
--
-stdio.h
--
-string.h
--
-unistd.h
--
-stdlib.h
--
-sys/socket.h
 -
 arpa/inet.h
 -

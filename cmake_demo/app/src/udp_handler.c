@@ -23,13 +23,18 @@
 #include <arpa/inet.h> 
 #include <netdb.h> 
 
-
+typedef struct{
+    char messageRx[MAX_LEN];
+    char prevMessage[MAX_LEN];
+    int bytesRx;
+} MessageRx;
 
 static struct sockaddr_in sinT;
 static struct sockaddr_in sinRemoteT;
 
 //
 static struct sockaddr_in sinRemotePyT;
+static MessageRx answer;
 //
 
 static int socketDescriptorT;
@@ -48,6 +53,7 @@ void openConnectionT()
         // nodejs server
         sinRemoteT.sin_family = AF_INET;
         sinRemoteT.sin_port = htons(RPORT_T);
+
         //serving from BBG - very slow
         // sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.2"); 
 
@@ -56,8 +62,9 @@ void openConnectionT()
 
         // python
         sinRemotePyT.sin_family = AF_INET;
-        sinRemotePyT.sin_port = htons(RPORT_T);
-        //serving from BBG - very slow
+        sinRemotePyT.sin_port = htons(PYPORT_T);
+
+        // serving from BBG - very slow
         // sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.2"); 
 
         // for serving from host
@@ -74,7 +81,14 @@ int sendResponseT(const void *str, int size)
                         0,
                         (struct sockaddr *) &sinRemoteT, 
                         sizeof(sinRemoteT)
-                  );
+                  );        
+        return packetSent;
+}
+
+// Send video frame using udp packet
+int sendResponsePyT(const void *str, int size) 
+{
+        int packetSent = 0;
         sendto(socketDescriptorT,
                         str,
                         size,
@@ -82,9 +96,17 @@ int sendResponseT(const void *str, int size)
                         (struct sockaddr *) &sinRemotePyT, 
                         sizeof(sinRemotePyT)
                   );
-
-                
+       
         return packetSent;
+}
+
+void getAnswer(void)
+{
+        //Receive Data
+    unsigned int sin_len = sizeof(sinRemotePyT);
+    answer.bytesRx = recvfrom(socketDescriptorT, answer.messageRx, MAX_LEN -1, 0, (struct sockaddr *) &sinRemotePyT, &sin_len);
+    answer.messageRx[answer.bytesRx] = 0; //Null terminated (string)
+    printf("%s\n", answer.messageRx);
 }
 
 //Close udp connection
