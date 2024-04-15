@@ -7,6 +7,7 @@ const io = new Server(server);
 const startRouter = require('./routers/page.js');
 const {SERVER_PORT: port = 3000} = process.env;
 const child = require('child_process');
+var dgram = require('dgram');
 
 var ffmpegCommand = require('fluent-ffmpeg');
 const fs = require('fs');
@@ -77,6 +78,11 @@ io.on('connection', (socket) => {
                 io.sockets.emit('canvas',frame); //send data to client
         });
 
+        console.log('streamed, about to get messages from C');
+
+
+        handleCommand(socket);
+
 
         // var command = ffmpeg("udp://192.168.7.1:1234").inputOptions([
         //         "-re", 
@@ -116,6 +122,112 @@ io.on('connection', (socket) => {
 
 
 });
+
+// io.on('daUdpCommand', function(data) {
+//         console.log("recieiving messages from C");
+        // var PORT = 3001;
+        // var HOST = '192.168.7.2';
+        // var buffer = new Buffer(data);
+
+        // var client = dgram.createSocket('udp4');
+        // // send message to C
+        // client.send(buffer, 0, buffer.length, PORT, HOST, function(err, bytes) {
+        //         if (err) 
+        //                 throw err;
+        //         console.log('UDP message sent to ' + HOST +':'+ PORT);
+        // });
+
+        // client.on('listening', function () {
+        //         var address = client.address();
+        //         console.log('UDP Client: listening on ' + address.address + ":" + address.port);
+        // });
+        // // Handle an incoming message over the UDP from the local application.
+
+        // var udpErrorTimer = setTimeout(function() {
+        //         io.emit('udpTimeoutError',
+        //         // socket.emit('udpTimeoutError', 
+        //         "UDP client on target failed to respond");
+        // }, 1000);
+
+        // // send message to website
+        // client.on('message', function (message, remote) {
+        //         console.log("UDP Client: message Rx" + remote.address + ':' + remote.port +' - ' + message);
+
+        //         var reply = message.toString('utf8')
+        //         // socket.emit('commandReply', reply);
+        //         // io.sockets.emit('commandReply',reply); //send data to client
+        //         io.emit('commandReply',reply);
+
+        //         client.close();
+        //         clearTimeout(udpErrorTimer);
+
+        // });
+        // client.on("UDP Client: close", function() {
+        //         console.log("closed");
+        // });
+        // client.on("UDP Client: error", function(err) {
+        //         console.log("error: ",err);
+        // });        
+// });
+
+
+
+
+
+function handleCommand(socket) {
+	// Pased string of comamnd to relay
+        socket.on('daUdpCommand', function(data) {
+	// socket.on('daUdpCommand', function(data) {
+		// console.log('daUdpCommand command: ' + data);
+
+
+                console.log("sending messages from C " + data);     
+		var PORT = 3001;
+		var HOST = '192.168.7.2';
+		var buffer = new Buffer(data);
+
+		var client = dgram.createSocket('udp4');
+                // send message to C
+		client.send(buffer, 0, buffer.length, PORT, HOST, function(err, bytes) {
+			if (err) 
+				throw err;
+			console.log('UDP message sent to ' + HOST +':'+ PORT);
+		});
+
+		client.on('listening', function () {
+			var address = client.address();
+			console.log('UDP Client: listening on ' + address.address + ":" + address.port);
+		});
+		// Handle an incoming message over the UDP from the local application.
+
+		var udpErrorTimer = setTimeout(function() {
+			io.sockets.emit('udpTimeoutError',
+                        // socket.emit('udpTimeoutError', 
+			"UDP client on target failed to respond");
+		}, 1000);
+
+                // send message to website
+		client.on('message', function (message, remote) {
+			console.log("UDP Client: message Rx" + remote.address + ':' + remote.port +' - ' + message);
+
+			var reply = message.toString('utf8')
+                        console.log("receiving from C " + reply);
+			// socket.emit('commandReply', reply);
+                        io.sockets.emit('commandReply',reply); //send data to client
+
+			client.close();
+			clearTimeout(udpErrorTimer);
+
+		});
+		client.on("UDP Client: close", function() {
+			console.log("closed");
+		});
+		client.on("UDP Client: error", function(err) {
+			console.log("error: ",err);
+		});
+        // };
+	});
+};
 
 server.listen({ port }, () => {
         console.log(`🚀 Server ready at http://0.0.0.0:${port}`);

@@ -1,6 +1,7 @@
 const socket = io();
 socket.on("connect", (socket) => { //confirm connection with NodeJS server
     console.log("Connected");
+    sendCommandViaUDP("send");
 });
 
 $( document ).ready(function() {
@@ -15,4 +16,22 @@ $( document ).ready(function() {
             context.drawImage(image,0,0,context.width, context.height);
         }
     });
+
+    window.setInterval(function() {sendCommandViaUDP("inference")}, 1000);
+
+    socket.on('commandReply', function(data) {
+        console.log(data);
+
+		// var results = data.split(' ');
+        // var current = document.getElementById('outputid');
+        // var output = current + results;
+        var output = data.split(' ');
+        // $("#outputid").html(output);
+        $("#outputid").val(output);
+    });
 });
+
+function sendCommandViaUDP(message) {
+	socket.emit('daUdpCommand', message);
+    // console.log('daUdpCommand'+ message);
+};
