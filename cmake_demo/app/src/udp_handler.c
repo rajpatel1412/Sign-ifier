@@ -139,7 +139,7 @@ void getAnswer(void)
          //Receive Data
     unsigned int sin_len = sizeof(sinRemotePy2T);
     answer.bytesRx = recvfrom(socketDescriptorT, answer.messageRx, MAX_LEN -1, 0, (struct sockaddr *) &sinRemotePy2T, &sin_len);
-//     answer.messageRx[answer.bytesRx] = 0; //Null terminated (string)
+    answer.messageRx[answer.bytesRx] = '\0'; //Null terminated (string)
     printf("%s\n", answer.messageRx);
 }
 
