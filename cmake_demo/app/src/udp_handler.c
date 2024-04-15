@@ -192,7 +192,10 @@ void getUdpCommands(void)
 
         if(strcmp(command.messageRx, "inference") == 0) {
                 sendResponseJST(answer.messageRx, answer.bytesRx);
-        }       
+        }  
+        if(strcmp(command.messageRx, "play") == 0) {
+                // play audio function
+        }   
         // sendResponseJST(command.messageRx, command.bytesRx);
 }
 

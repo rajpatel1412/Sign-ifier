@@ -19,6 +19,10 @@ $( document ).ready(function() {
 
     window.setInterval(function() {sendCommandViaUDP("inference")}, 1000);
 
+    $('#play').click(function(){
+		sendCommandViaUDP("play");
+	});
+
     socket.on('commandReply', function(data) {
         console.log(data);
 
