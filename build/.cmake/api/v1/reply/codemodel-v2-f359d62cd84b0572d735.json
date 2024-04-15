@@ -53,7 +53,7 @@
 				{
 					"directoryIndex" : 1,
 					"id" : "webcam_capture::@5f5a17c01335469806cb",
-					"jsonFile" : "target-webcam_capture-Debug-50e5d52de9f48a5c479a.json",
+					"jsonFile" : "target-webcam_capture-Debug-9216c4ee82ea3ea79c3a.json",
 					"name" : "webcam_capture",
 					"projectIndex" : 0
 				}
@@ -63,8 +63,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/raj/cmpt433/work/project/Sign-ifier/build",
-		"source" : "/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo"
+		"build" : "/home/psalniko/cmpt433/work/Sign-ifier/build",
+		"source" : "/home/psalniko/cmpt433/work/Sign-ifier/cmake_demo"
 	},
 	"version" : 
 	{

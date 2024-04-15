@@ -6,11 +6,11 @@
 
 #IncludeRegexTransform: 
 
-/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/include/capture.h
+/home/psalniko/cmpt433/work/Sign-ifier/cmake_demo/app/include/capture.h
 
-/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/include/udp_handler.h
+/home/psalniko/cmpt433/work/Sign-ifier/cmake_demo/app/include/udp_handler.h
 
-/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/capture.c
+/home/psalniko/cmpt433/work/Sign-ifier/cmake_demo/app/src/capture.c
 stdio.h
 -
 stdlib.h
@@ -40,15 +40,15 @@ sys/ioctl.h
 linux/videodev2.h
 -
 udp_handler.h
-/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/udp_handler.h
+/home/psalniko/cmpt433/work/Sign-ifier/cmake_demo/app/src/udp_handler.h
 pthread.h
 -
 
-/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/main.c
+/home/psalniko/cmpt433/work/Sign-ifier/cmake_demo/app/src/main.c
 capture.h
-/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/capture.h
+/home/psalniko/cmpt433/work/Sign-ifier/cmake_demo/app/src/capture.h
 udp_handler.h
-/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/udp_handler.h
+/home/psalniko/cmpt433/work/Sign-ifier/cmake_demo/app/src/udp_handler.h
 stdio.h
 -
 stdbool.h
@@ -58,7 +58,7 @@ stdlib.h
 time.h
 -
 
-/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/udp_handler.c
+/home/psalniko/cmpt433/work/Sign-ifier/cmake_demo/app/src/udp_handler.c
 stdio.h
 -
 stdlib.h
@@ -88,7 +88,7 @@ sys/ioctl.h
 linux/videodev2.h
 -
 udp_handler.h
-/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/udp_handler.h
+/home/psalniko/cmpt433/work/Sign-ifier/cmake_demo/app/src/udp_handler.h
 sys/socket.h
 -
 netinet/in.h

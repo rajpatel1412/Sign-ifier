@@ -67,10 +67,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/raj/cmpt433/work/project/Sign-ifier/cmake_demo
+CMAKE_SOURCE_DIR = /home/psalniko/cmpt433/work/Sign-ifier/cmake_demo
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/raj/cmpt433/work/project/Sign-ifier/build
+CMAKE_BINARY_DIR = /home/psalniko/cmpt433/work/Sign-ifier/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -99,9 +99,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles /home/raj/cmpt433/work/project/Sign-ifier/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/psalniko/cmpt433/work/Sign-ifier/build/CMakeFiles /home/psalniko/cmpt433/work/Sign-ifier/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/psalniko/cmpt433/work/Sign-ifier/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
