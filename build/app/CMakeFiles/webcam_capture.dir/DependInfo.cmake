@@ -6,6 +6,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_CHECK_C
   "/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/capture.c" "/home/raj/cmpt433/work/project/Sign-ifier/build/app/CMakeFiles/webcam_capture.dir/src/capture.c.o"
   "/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/main.c" "/home/raj/cmpt433/work/project/Sign-ifier/build/app/CMakeFiles/webcam_capture.dir/src/main.c.o"
+  "/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/udp_handler.c" "/home/raj/cmpt433/work/project/Sign-ifier/build/app/CMakeFiles/webcam_capture.dir/src/udp_handler.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 
