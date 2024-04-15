@@ -36,12 +36,12 @@ labels_dict = {
 
 import socket
 
-UDP_IP = "192.168.7.1"
-UDP_PORT = 12345
+# UDP_IP = "192.168.7.1"
+# UDP_PORT = 12345
 
 
-sock = socket.socket(socket.AF_INET, # Internet
-                     socket.SOCK_DGRAM) # UDP
+# sock = socket.socket(socket.AF_INET, # Internet
+#                      socket.SOCK_DGRAM) # UDP
 
 predictions = np.zeros(num_symbols)
 # while True:
@@ -51,6 +51,14 @@ predictions = np.zeros(num_symbols)
 # but obviously the program should still just idle if not.
 # If a sign is recognized in the video then process as normal, otherwise just idle.
 
+sock = socket.socket(socket.AF_INET , socket.SOCK_DGRAM) 
+ip="192.168.7.2"   
+port=3000
+answer = 1
+
+
+cap = cv2.VideoCapture("udp://192.168.7.1:12345")   
+
 while True:
 
     # cap = cv2.VideoCapture("./test_A3.mov")
@@ -59,18 +67,20 @@ while True:
     #     cv2.waitKey(1000)
     #     print("Wait for the header")
 
-    cap = cv2.VideoCapture(1)
+    # cap = cv2.VideoCapture(1)
+
+
     flag, frame = cap.read()
 
     # while flag:
-    for h in range(10):
+    for h in range(5):
         # print("new iteration")
         data_aux = []
         x_ = []
         y_ = []
 
     # skip a number of frames for efficiency
-        for i in range(7):
+        for i in range(5):
             flag, frame = cap.read()
 
         # if not flag:
@@ -115,7 +125,7 @@ while True:
             predicted_character = labels_dict[int(prediction[0])]
             predictions[int(prediction[0])] += 1
 
-        # cv2.imshow('frame',frame)
+        cv2.imshow('frame',frame)
         cv2.waitKey(10)
 
     index_max = np.argmax(predictions)
@@ -126,7 +136,7 @@ while True:
     message = labels_dict[index_max]
     print(message)
 
-    sock.sendto(message.encode(), (UDP_IP,UDP_PORT))
+    sock.sendto(message.encode(), (ip,port))
 
     predictions = np.zeros(num_symbols)
 
