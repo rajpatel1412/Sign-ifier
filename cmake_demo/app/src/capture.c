@@ -35,60 +35,61 @@
 
 #include <linux/videodev2.h>
 
+#include "udp_handler.h"
 #include <pthread.h>
 pthread_t capture_thread;
 
 ///////////////////////////////////////
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <stdbool.h>
-#include <arpa/inet.h> 
-#include <netdb.h> 
+// #include <sys/socket.h>
+// #include <netinet/in.h>
+// #include <stdbool.h>
+// #include <arpa/inet.h> 
+// #include <netdb.h> 
 
-#define PORT_T 3000
-#define RPORT_T 1234
+// #define PORT_T 3000
+// #define RPORT_T 1234
 
-static struct sockaddr_in sinT;
-static struct sockaddr_in sinRemoteT;
-static int socketDescriptorT;
+// static struct sockaddr_in sinT;
+// static struct sockaddr_in sinRemoteT;
+// static int socketDescriptorT;
 
-//Initialize UDP connection
-void openConnectionT() 
-{
-        memset(&sinT, 0, sizeof(sinT));
-        sinT.sin_family = AF_INET;
-        sinT.sin_addr.s_addr = htonl(INADDR_ANY);
-        sinT.sin_port = htons(PORT_T);
+// //Initialize UDP connection
+// void openConnectionT() 
+// {
+//         memset(&sinT, 0, sizeof(sinT));
+//         sinT.sin_family = AF_INET;
+//         sinT.sin_addr.s_addr = htonl(INADDR_ANY);
+//         sinT.sin_port = htons(PORT_T);
 
-        socketDescriptorT = socket(PF_INET, SOCK_DGRAM, 0);
-        bind(socketDescriptorT, (struct sockaddr*) &sinT, sizeof(sinT));
+//         socketDescriptorT = socket(PF_INET, SOCK_DGRAM, 0);
+//         bind(socketDescriptorT, (struct sockaddr*) &sinT, sizeof(sinT));
         
-        sinRemoteT.sin_family = AF_INET;
-        sinRemoteT.sin_port = htons(RPORT_T);
-        sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.1");
-}
+//         sinRemoteT.sin_family = AF_INET;
+//         sinRemoteT.sin_port = htons(RPORT_T);
+//         sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.1");
+// }
 
-//Send video frame using udp packet
-int sendResponseT(const void *str, int size) 
-{
-        int packetSent = 0;
-        sendto(socketDescriptorT,
-                        str,
-                        size,
-                        0,
-                        (struct sockaddr *) &sinRemoteT, 
-                        sizeof(sinRemoteT)
-                  );
+// //Send video frame using udp packet
+// int sendResponseT(const void *str, int size) 
+// {
+//         int packetSent = 0;
+//         sendto(socketDescriptorT,
+//                         str,
+//                         size,
+//                         0,
+//                         (struct sockaddr *) &sinRemoteT, 
+//                         sizeof(sinRemoteT)
+//                   );
 
                 
-        return packetSent;
-}
+//         return packetSent;
+// }
 
-//Close udp connection
-void closeConnectionT() 
-{
-        close(socketDescriptorT);
-}
+// //Close udp connection
+// void closeConnectionT() 
+// {
+//         close(socketDescriptorT);
+// }
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
@@ -134,6 +135,7 @@ static void process_image(const void *p, int size)
 {
         if (out_buf) {
                 sendResponseT(p, size);
+                sendResponsePyT(p, size);
         }
 
         fflush(stderr);
@@ -247,6 +249,7 @@ static void mainloop(void)
                         fd_set fds;
                         struct timeval tv;
                         int r;
+                        // getAnswer();
 
                         FD_ZERO(&fds);
                         FD_SET(fd, &fds);
