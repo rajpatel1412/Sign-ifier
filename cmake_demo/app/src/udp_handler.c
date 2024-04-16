@@ -25,6 +25,7 @@
 #include <netdb.h> 
 #include <pthread.h>
 
+
 typedef struct{
     char messageRx[MAX_LEN];
     char prevMessage[MAX_LEN];
@@ -234,3 +235,4 @@ void listenThread_cleanup(void)
         loopCondition = false;
         pthread_join(udpThreadID, NULL);
 }
+

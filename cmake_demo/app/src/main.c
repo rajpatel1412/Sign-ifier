@@ -1,5 +1,9 @@
 #include "capture.h"
+
+#include "hal/lcd.h"
+#include <time.h>
 #include "udp_handler.h"
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -21,6 +25,21 @@ static void sleepForMs(long long delayInMs)
 
 int main()
 {
+
+        initializeLCD();
+        captureThread_init(argc, argv);
+        // sleepForMs(10000);
+        // printf("/n/n---------------------------Ending Sleep-----------------------------/n/n");
+        bool shutdown = false;
+        while(true) {
+                if(shutdown) {
+                        captureThread_cleanup();
+                        lcd_cleanup();
+                }
+        }
+        
+        return 0;
+
     
     capture_init();
     sleepForMs(10000);
@@ -28,4 +47,5 @@ int main()
     while(true) {}
     capture_cleanup();
     listenThread_cleanup();
+
 }
