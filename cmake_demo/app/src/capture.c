@@ -1,4 +1,5 @@
-/*
+/*  
+ *  Code retrieved from https://github.com/derekmolloy/boneCV/blob/master/capture.c
  *  V4L2 video capture example, modified by Derek Molloy for the Logitech C920 camera
  *  Modifications, added the -F mode for H264 capture and associated help detail
  *  www.derekmolloy.ie
@@ -9,6 +10,11 @@
  *
  *      This program is provided with the V4L2 API
  * see http://linuxtv.org/docs.php for more information
+ *
+ * CMPT433
+ * Minor Modification made by Yoonhong to add socket programming to send video data in udp packets
+ * instead of adding video data to stdout. This has shown to improve the latency issues with using
+ * this script
  */
 
 #include <stdio.h>
@@ -29,8 +35,61 @@
 
 #include <linux/videodev2.h>
 
+#include "udp_handler.h"
 #include <pthread.h>
-#include <capture.h>
+pthread_t capture_thread;
+
+///////////////////////////////////////
+// #include <sys/socket.h>
+// #include <netinet/in.h>
+// #include <stdbool.h>
+// #include <arpa/inet.h> 
+// #include <netdb.h> 
+
+// #define PORT_T 3000
+// #define RPORT_T 1234
+
+// static struct sockaddr_in sinT;
+// static struct sockaddr_in sinRemoteT;
+// static int socketDescriptorT;
+
+// //Initialize UDP connection
+// void openConnectionT() 
+// {
+//         memset(&sinT, 0, sizeof(sinT));
+//         sinT.sin_family = AF_INET;
+//         sinT.sin_addr.s_addr = htonl(INADDR_ANY);
+//         sinT.sin_port = htons(PORT_T);
+
+//         socketDescriptorT = socket(PF_INET, SOCK_DGRAM, 0);
+//         bind(socketDescriptorT, (struct sockaddr*) &sinT, sizeof(sinT));
+        
+//         sinRemoteT.sin_family = AF_INET;
+//         sinRemoteT.sin_port = htons(RPORT_T);
+//         sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.1");
+// }
+
+// //Send video frame using udp packet
+// int sendResponseT(const void *str, int size) 
+// {
+//         int packetSent = 0;
+//         sendto(socketDescriptorT,
+//                         str,
+//                         size,
+//                         0,
+//                         (struct sockaddr *) &sinRemoteT, 
+//                         sizeof(sinRemoteT)
+//                   );
+
+                
+//         return packetSent;
+// }
+
+// //Close udp connection
+// void closeConnectionT() 
+// {
+//         close(socketDescriptorT);
+// }
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
@@ -53,10 +112,7 @@ static unsigned int     n_buffers;
 static int              out_buf;
 static int              force_format = 0;
 static int              frame_count = 100;
-
-static unsigned int loopIsInfinite = 1;
-pthread_t captureThreadID;
-
+unsigned int            loopIsInfinite = 1;
 
 static void errno_exit(const char *s)
 {
@@ -77,12 +133,12 @@ static int xioctl(int fh, int request, void *arg)
 
 static void process_image(const void *p, int size)
 {
-        if (out_buf)
-                fwrite(p, size, 1, stdout);
+        if (out_buf) {
+                sendResponseT(p, size);
+                sendResponsePyT(p, size);
+        }
 
         fflush(stderr);
-        fprintf(stderr, ".");
-        fflush(stdout);
 }
 
 static int read_frame(void)
@@ -186,11 +242,14 @@ static void mainloop(void)
 	// count = frame_count;
 
         // while ((count-- > 0) || loopIsInfinite) {
-        while (loopIsInfinite) {
+
+        
+        while (loopIsInfinite) {                
                 for (;;) {
                         fd_set fds;
                         struct timeval tv;
                         int r;
+                        // getAnswer();
 
                         FD_ZERO(&fds);
                         FD_SET(fd, &fds);
@@ -499,20 +558,16 @@ static void init_device(void)
 	fprintf(stderr, "Force Format %d\n", force_format);
         if (force_format) {
 		if (force_format==2){
-             	    // fmt.fmt.pix.width       = 1920;     
-                    // fmt.fmt.pix.height      = 1080;  
-                    // fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_H264;
-                    // fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
-                    fmt.fmt.pix.width       = 720;     
-                    fmt.fmt.pix.height      = 480;  
-                    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
-                fmt.fmt.pix.field       = V4L2_FIELD_NONE;
+             		fmt.fmt.pix.width       = 720;     
+           		fmt.fmt.pix.height      = 720;  
+  			fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
+                        fmt.fmt.pix.field = V4L2_FIELD_NONE;
 		}
 		else if(force_format==1){
 			fmt.fmt.pix.width	= 640;
 			fmt.fmt.pix.height	= 480;
-			fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
-			fmt.fmt.pix.field	= V4L2_FIELD_INTERLACED;
+			fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
+                        fmt.fmt.pix.field = V4L2_FIELD_NONE;
 		}
 
                 if (-1 == xioctl(fd, VIDIOC_S_FMT, &fmt))
@@ -559,7 +614,6 @@ static void close_device(void)
 static void open_device(void)
 {
         struct stat st;
-        // dev_name ="/dev/video0";
 
         if (-1 == stat(dev_name, &st)) {
                 fprintf(stderr, "Cannot identify '%s': %d, %s\n",
@@ -581,111 +635,21 @@ static void open_device(void)
         }
 }
 
-// static void usage(FILE *fp, int argc, char **argv)
-static void usage(FILE *fp, char **argv)
-{
-        fprintf(fp,
-                 "Usage: %s [options]\n\n"
-                 "Version 1.3\n"
-                 "Options:\n"
-                 "-d | --device name   Video device name [%s]\n"
-                 "-h | --help          Print this message\n"
-                 "-m | --mmap          Use memory mapped buffers [default]\n"
-                 "-r | --read          Use read() calls\n"
-                 "-u | --userp         Use application allocated buffers\n"
-                 "-o | --output        Outputs stream to stdout\n"
-                 "-f | --format        Force format to 640x480 YUYV\n"
-		 "-F | --formatH264    Force format to 1920x1080 H264\n"
-                 "-c | --count         Number of frames to grab [%i] - use 0 for infinite\n"
-                 "\n"
-		 "Example usage: capture -F -o -c 300 > output.raw\n"
-		 "Captures 300 frames of H264 at 1920x1080 - use raw2mpg4 script to convert to mpg4\n",
-                 argv[0], dev_name, frame_count);
-}
-
-static const char short_options[] = "d:hmruofFc:";
-
-static const struct option
-long_options[] = {
-        { "device", required_argument, NULL, 'd' },
-        { "help",   no_argument,       NULL, 'h' },
-        { "mmap",   no_argument,       NULL, 'm' },
-        { "read",   no_argument,       NULL, 'r' },
-        { "userp",  no_argument,       NULL, 'u' },
-        { "output", no_argument,       NULL, 'o' },
-        { "format", no_argument,       NULL, 'f' },
-	{ "formatH264", no_argument,   NULL, 'F' },
-        { "count",  required_argument, NULL, 'c' },
-        { 0, 0, 0, 0 }
-};
-
-void* run_capture(void* args)
-// void run_capture(int argc, char **argv)
-{
-        argsList arguments = *(argsList *) args;
-        int argc = arguments.argc;
-        char** argv = arguments.argv;
-        
+// int main()
+void* capture(void* args)
+{       
+        printf("Starting streaming\n");
+        openConnectionT();
         dev_name = "/dev/video0";
 
-        for (;;) {
-                int idx;
-                int c;
+        force_format=2;
+        out_buf++;
 
-                c = getopt_long(argc, argv,
-                                short_options, long_options, &idx);
-
-                if (-1 == c)
-                        break;
-
-                switch (c) {
-                case 0: /* getopt_long() flag */
-                        break;
-
-                case 'd':
-                        dev_name = optarg;
-                        break;
-
-                case 'h':
-                        usage(stdout, argv);
-                        exit(EXIT_SUCCESS);
-
-                case 'm':
-                        io = IO_METHOD_MMAP;
-                        break;
-
-                case 'r':
-                        io = IO_METHOD_READ;
-                        break;
-
-                case 'u':
-                        io = IO_METHOD_USERPTR;
-                        break;
-
-                case 'o':
-                        out_buf++;
-                        break;
-
-                case 'f':
-                        force_format=1;
-                        break;
-
-		case 'F':
-			force_format=2;
-			break;
-
-                case 'c':
-                        errno = 0;
-                        frame_count = strtol(optarg, NULL, 0);
-                        if (errno)
-                                errno_exit(optarg);
-                        break;
-
-                default:
-                        usage(stderr, argv);
-                        exit(EXIT_FAILURE);
-                }
-        }
+        // errno = 0;
+        // char opt = '0';
+        // frame_count = strtol(&opt, NULL, 0);
+        // if(errno) errno_exit(&opt);
+        frame_count = 0;
 
         open_device();
         init_device();
@@ -695,21 +659,19 @@ void* run_capture(void* args)
         uninit_device();
         close_device();
         fprintf(stderr, "\n");
+        closeConnectionT();
+        printf("Ending streaming\n");
         // return 0;
-        return NULL;
+        return args;
 }
 
-void captureThread_init(int argc, char **argv)
-{       
-        argsList args;
-        args.argc = argc;
-        args.argv = argv;
-        loopIsInfinite = 1;
-        pthread_create(&captureThreadID, NULL, run_capture, &args);
+void capture_init(void)
+{
+        pthread_create(&capture_thread, NULL, capture, NULL);
 }
 
-void captureThread_cleanup(void)
+void capture_cleanup(void)
 {
         loopIsInfinite = 0;
-        pthread_join(captureThreadID, NULL);
+        pthread_join(capture_thread, NULL);
 }

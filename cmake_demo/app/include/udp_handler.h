@@ -1,21 +1,22 @@
-// UDP Network Manager
-
-// Handles all things network related
-// Listens to incoming UDP Packets on port 12345
-// Treats each packet as a command to respond to
-// Handles command to shutdown system
-
-#include <netinet/in.h>
 #ifndef _UDP_HANDLER_H_
 #define _UDP_HANDLER_H_
 
-#include <stdbool.h>
+#define PORT_T 3000
+// #define PY_LISTEN_PORT_T 3000
+#define JS_PORT_T 3001
+#define RPORT_T 1234
+#define PYPORT_T 12345
+#define PORT_LISTEN_PY_T 12346
 
-void Socket_init(void);
-void Socket_cleanup(void);
-void Socket_listen(struct sockaddr_in *sinRemote);
-void Socket_reply();
-bool Socket_getIsShutdown(void);
-int sendResponse(const void* str, int size);
+
+#define MAX_LEN 4096
+
+void openConnectionT();
+int sendResponseT(const void *str, int size);
+int sendResponsePyT(const void *str, int size);
+void getAnswer(void);
+void closeConnectionT(); 
+void listenThread_init(void);
+void listenThread_cleanup(void);
 
 #endif

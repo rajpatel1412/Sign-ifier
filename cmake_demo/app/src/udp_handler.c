@@ -1,41 +1,30 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include <getopt.h>             /* getopt_long() */
+
+#include <fcntl.h>              /* low-level i/o */
+#include <unistd.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/mman.h>
+#include <sys/ioctl.h>
+
+#include <linux/videodev2.h>
 
 #include "udp_handler.h"
-#include "capture.h"
-#include "hal/lcd.h"
-
-#include <assert.h>
-#include <pthread.h>
+// #include "hal/lcd.h"
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
+#include <arpa/inet.h> 
+#include <netdb.h> 
+#include <pthread.h>
 
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-
-#define MAX_LEN 4096
-#define PORT_T 3000
-#define RPORT_T 1234
-#define NUMBERS_PER_LINE 20
-#define BUFFER_LENGTH 1024
-#define HOST_ADDRESS "192.168.7.1"
-
-
-// static bool socket_init = false;
-
-static int socketDescriptorT;
-static struct sockaddr_in sinT;
-static struct sockaddr_in sinRemoteT;
-static bool isShutdown = false;
-static bool Socket_loopCondition;
-
-static pthread_t udp_listenThread_id;
-// static void sleepForMs(long long delayInMs);
-// static void readFromFile(char *fileName, char *buff);
-void *udp_listenThread();
 
 typedef struct{
     char messageRx[MAX_LEN];
@@ -43,129 +32,207 @@ typedef struct{
     int bytesRx;
 } MessageRx;
 
-// typedef struct {
-//     char messageTx[MAX_LEN];
-//     bool first_command;
-// } MessageTx;
+static struct sockaddr_in sinT; // sending video
+static struct sockaddr_in sinRemoteT; // sending video to website
 
+//
+static struct sockaddr_in sinJST; // sending commands to website
+static struct sockaddr_in sinRemotePyT;  // streaming to python
+static struct sockaddr_in sinRemotePy2T; // listening from python
+static struct sockaddr_in sinRemoteJST; // sending commands to website
+static MessageRx answer;
 static MessageRx command;
-// static MessageTx reply;
+bool loopCondition = true;
+pthread_t udpThreadID;
+static int socketDescriptorJST; // sending other data to website
+//
 
-// starts thread to listen for and send packets
-void Socket_init(void)
-{
-    // assert(!socket_init);
-    
-    //Set port and IP
-    memset(&sinT, 0, sizeof(sinT));
-    sinT.sin_family = AF_INET;
-    sinT.sin_addr.s_addr = htonl(INADDR_ANY);
-    sinT.sin_port = htons(PORT_T);
+static int socketDescriptorT; // sending video
 
-    //Create and bind to socket
-    socketDescriptorT = socket(PF_INET, SOCK_DGRAM, 0);
-    bind(socketDescriptorT, (struct sockaddr*) &sinT, sizeof(sinT));
+//Initialize UDP connection
+void openConnectionT() 
+{       
+        // socket listening ffrom website
+        memset(&sinT, 0, sizeof(sinT));
+        sinT.sin_family = AF_INET;
+        sinT.sin_addr.s_addr = htonl(INADDR_ANY);
+        sinT.sin_port = htons(PORT_T);
 
-    sinRemoteT.sin_family = AF_INET;
-    sinRemoteT.sin_port = htons(RPORT_T);
-    sinRemoteT.sin_addr.s_addr = inet_addr(HOST_ADDRESS);
-
-    Socket_loopCondition = true;
-    // socket_init = true;
-    pthread_create(&udp_listenThread_id, NULL, &udp_listenThread, NULL);
-    
-}
-// gracefully exits the socket thread
-void Socket_cleanup(void)
-{
-    // assert(socket_init);
-    Socket_loopCondition = false;
-    close(socketDescriptorT);
-    pthread_join(udp_listenThread_id, NULL);
-    // socket_init = false;
-}
-
-void Socket_listen(struct sockaddr_in *sinRemote)
-{
-    //Receive Data
-    lcd_clear();
-    unsigned int sin_len = sizeof(*sinRemote);
-    snprintf(command.prevMessage, MAX_LEN, command.messageRx);
-    command.bytesRx = recvfrom(socketDescriptorT, command.messageRx, MAX_LEN -1, 0, (struct sockaddr *) sinRemote, &sin_len);
-    command.messageRx[command.bytesRx] = 0; //Null terminated (string)
-    lcd_display(command.messageRx);
-}
-
-void Socket_reply()
-{
-    //Create reply
-    if (strcmp(command.messageRx, "stop") == 0) {
-        // exits the application
-        isShutdown = true;
-        Socket_loopCondition = false;
-    }
-    else {
-        printf(command.messageRx);
-        /*
-
-        Add the function to display message on screen
-        And do the text to speech conversion
+        socketDescriptorT = socket(PF_INET, SOCK_DGRAM, 0);
+        bind(socketDescriptorT, (struct sockaddr*) &sinT, sizeof(sinT));
 
 
-        */
-    }
-}
+        
+        // socket communbicating other data with js
+        memset(&sinJST, 0, sizeof(sinJST));
+        sinJST.sin_family = AF_INET;
+        sinJST.sin_addr.s_addr = htonl(INADDR_ANY);
+        sinJST.sin_port = htons(JS_PORT_T);
 
-int sendResponse(const void* str, int size) 
-{
-    int packetSent = 0;
-    sendto(socketDescriptorT, str, size, 0, (struct sockaddr*) 
-            &sinRemoteT, sizeof(sinRemoteT));
-    return packetSent;
-}
+        socketDescriptorJST = socket(PF_INET, SOCK_DGRAM, 0);
+        bind(socketDescriptorJST, (struct sockaddr*) &sinJST, sizeof(sinJST));
+        
 
-// thread that sends and recieves packets
-void *udp_listenThread()
-{
-    struct sockaddr_in sinRemote;
-    isShutdown = false;
-    // reply.first_command = true;
-    while (Socket_loopCondition) {
-        Socket_listen(&sinRemote);
-        Socket_reply(&sinRemote);
-    }
-    return NULL;
+
+        // nodejs server video
+        sinRemoteT.sin_family = AF_INET;
+        sinRemoteT.sin_port = htons(RPORT_T);
+
+        //serving from BBG - very slow
+        // sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.2"); 
+
+        // for serving from host
+        sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.1");
+
+
+
+        // nodejs server other commands
+        sinRemoteJST.sin_family = AF_INET;
+        sinRemoteJST.sin_port = htons(RPORT_T);
+
+        //serving from BBG - very slow
+        // sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.2"); 
+
+        // for serving from host
+        sinRemoteJST.sin_addr.s_addr = inet_addr("192.168.7.1");
+
+
+
+        //  sedning to python
+        sinRemotePyT.sin_family = AF_INET;
+        sinRemotePyT.sin_port = htons(PYPORT_T);
+
+        // serving from BBG - very slow
+        // sinRemotePyT.sin_addr.s_addr = inet_addr("192.168.7.2"); 
+
+        // for serving from host
+        sinRemotePyT.sin_addr.s_addr = inet_addr("192.168.7.1");
+
+
+
+        //  recieving from python
+        sinRemotePy2T.sin_family = AF_INET;
+        sinRemotePy2T.sin_port = htons(PORT_LISTEN_PY_T);
+
+        // serving from BBG - very slow
+        // sinRemotePy2T.sin_addr.s_addr = inet_addr("192.168.7.2"); 
+
+        // for serving from host
+        sinRemotePy2T.sin_addr.s_addr = inet_addr("192.168.7.1");
 }
 
-// to control shutdown
-bool Socket_getIsShutdown(void)
+//Send video frame using udp packet
+int sendResponseT(const void *str, int size) 
 {
-    return isShutdown;
+        int packetSent = 0;
+        sendto(socketDescriptorT,
+                        str,
+                        size,
+                        0,
+                        (struct sockaddr *) &sinRemoteT, 
+                        sizeof(sinRemoteT)
+                  );        
+        return packetSent;
 }
 
-// // Lets the program wait for the specified number of milliseconds
-// // For instance when waiting for the pins to be configured
-// // from assignment documentation
-// static void sleepForMs(long long delayInMs)
-// {
-//     const long long NS_PER_MS = 1000 * 1000;
-//     const long long NS_PER_SECOND = 1000000000;
-//     long long delayNs = delayInMs * NS_PER_MS;
-//     int seconds = delayNs / NS_PER_SECOND;
-//     int nanoseconds = delayNs % NS_PER_SECOND;
-//     struct timespec reqDelay = {seconds, nanoseconds};
-//     nanosleep(&reqDelay, (struct timespec *) NULL);
-// }
+// Send video frame using udp packet
+int sendResponsePyT(const void *str, int size) 
+{
+        int packetSent = 0;
+        sendto(socketDescriptorT,
+                        str,
+                        size,
+                        0,
+                        (struct sockaddr *) &sinRemotePyT, 
+                        sizeof(sinRemotePyT)
+                  );
+       
+        return packetSent;
+}
 
-// Reads the value from a file and stores it in buff
-// static void readFromFile(char *fileName, char *buff)
-// {
-//     FILE *pFile = fopen(fileName, "r");
-//     if(pFile == NULL) {
-//         printf("ERROR: Unable to open file %s for read\n", fileName);
-//         exit(-1);
-//     }
+// Send other commands using udp packet
+int sendResponseJST(const void *str, int size) 
+{
+        int packetSent = 0;
+        sendto(socketDescriptorJST,
+                        str,
+                        size,
+                        0,
+                        (struct sockaddr *) &sinRemoteJST, 
+                        sizeof(sinRemoteJST)
+                  );
+       
+        return packetSent;
+}
 
-//     fgets(buff, BUFFER_LENGTH, pFile);
-//     fclose(pFile);
-// }
+
+// recieve inference from python
+void getAnswer(void)
+{
+//         //Receive Data
+//     unsigned int sin_len = sizeof(sinRemotePyT);
+//     answer.bytesRx = recvfrom(socketDescriptorPyT, answer.messageRx, MAX_LEN -1, 0, (struct sockaddr *) &sinRemotePyT, &sin_len);
+// //     answer.messageRx[answer.bytesRx] = 0; //Null terminated (string)
+//     printf("%s\n", answer.messageRx);
+
+         //Receive Data from python
+    unsigned int sin_len = sizeof(sinRemotePy2T);
+    answer.bytesRx = recvfrom(socketDescriptorT, answer.messageRx, MAX_LEN -1, 0, (struct sockaddr *) &sinRemotePy2T, &sin_len);
+//     answer.messageRx[answer.bytesRx] = 0; //Null terminated (string)
+    printf("%s\n", answer.messageRx);
+//     sendResponseJST(answer.messageRx, answer.bytesRx);
+
+}
+
+// recieve command from udp
+void getUdpCommands(void)
+{
+        unsigned int sin_len = sizeof(sinRemoteJST);
+        command.bytesRx = recvfrom(socketDescriptorJST, command.messageRx, MAX_LEN -1, 0, (struct sockaddr *) &sinRemoteJST, &sin_len);
+        // answer.messageRx[answer.bytesRx] = 0; //Null terminated (string)
+        printf("%s\n", command.messageRx);
+
+        if(strcmp(command.messageRx, "inference") == 0) {
+                sendResponseJST(answer.messageRx, answer.bytesRx);
+        }  
+        if(strcmp(command.messageRx, "play") == 0) {
+                // play audio function
+        }
+        if(strcmp(command.messageRx, "clear") == 0) {
+                // clear text display
+                // 
+        }   
+        if(strcmp(command.messageRx, "off") == 0) {
+                // stop the whole system
+        }
+        // sendResponseJST(command.messageRx, command.bytesRx);
+}
+
+//Close udp connection
+void closeConnectionT() 
+{
+        close(socketDescriptorT);
+}
+
+
+void* listenThread(void* args)
+{
+        while(true) {
+                getAnswer();
+                getUdpCommands();
+        }  
+        // getAnswer();
+        return args;
+}
+
+void listenThread_init(void)
+{
+        pthread_create(&udpThreadID, NULL, listenThread, NULL);
+}
+
+void listenThread_cleanup(void)
+{
+        loopCondition = false;
+        pthread_join(udpThreadID, NULL);
+}
+
