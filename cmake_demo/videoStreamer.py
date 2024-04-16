@@ -25,11 +25,13 @@ ret,frame = cap.read()
 
 while ret: 
     if not ret:
+        print("not ret")
         continue
     cv2.imshow('frame', frame) 
     # global answer 
     # answer = b'answer'
     answer = answer + 1
+    # print(answer)
     # answerString = b'answer = {answer}'
     if(answer % 100 == 0):
         answerString = str(answer).encode()
@@ -49,6 +51,7 @@ while ret:
         break
     
     ret, frame = cap.read()
+    
 cap.release() 
 cv2.destroyAllWindows() 
 

@@ -32,6 +32,8 @@ typedef struct{
     int bytesRx;
 } MessageRx;
 
+static bool stopping = false;
+
 static struct sockaddr_in sinT; // sending video
 static struct sockaddr_in sinRemoteT; // sending video to website
 
@@ -48,6 +50,11 @@ static int socketDescriptorJST; // sending other data to website
 //
 
 static int socketDescriptorT; // sending video
+
+bool udp_isStopping()
+{
+        return stopping;
+}
 
 //Initialize UDP connection
 void openConnectionT() 
@@ -201,10 +208,12 @@ void getUdpCommands(void)
         }
         if(strcmp(command.messageRx, "clear") == 0) {
                 // clear text display
+                answer.messageRx[0] = '\0';
                 lcd_clear();
         }   
         if(strcmp(command.messageRx, "off") == 0) {
                 // stop the whole system
+                stopping = true;
 
         }
         // sendResponseJST(command.messageRx, command.bytesRx);

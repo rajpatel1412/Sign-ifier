@@ -10,7 +10,11 @@
   "dependencies": {
     "express": "^4.17.3",
     "fluent-ffmpeg": "^2.1.2",
-    "socket.io": "^4.4.1"
+    "io": "^1.5.0",
+    "mime": "^1.6.0",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^1.7.4",
+    "socketio": "^1.0.0"
   },
   "description": ""
 }

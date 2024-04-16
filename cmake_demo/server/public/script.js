@@ -22,6 +22,12 @@ $( document ).ready(function() {
     $('#play').click(function(){
 		sendCommandViaUDP("play");
 	});
+    $('#clear').click(function(){
+		sendCommandViaUDP("clear");
+	});
+    $('#off').click(function(){
+		sendCommandViaUDP("off");
+	});
 
     socket.on('commandReply', function(data) {
         console.log(data);

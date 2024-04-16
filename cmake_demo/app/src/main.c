@@ -30,7 +30,7 @@ int main()
         capture_init();
         sleepForMs(10000);
         listenThread_init();
-        while(true) {}
+        while(!udp_isStopping()) {}
         capture_cleanup();
         listenThread_cleanup();
 
