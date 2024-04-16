@@ -18,5 +18,6 @@ void getAnswer(void);
 void closeConnectionT(); 
 void listenThread_init(void);
 void listenThread_cleanup(void);
+void getUdpCommands(void);
 
 #endif

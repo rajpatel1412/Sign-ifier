@@ -17,7 +17,7 @@
 #include <linux/videodev2.h>
 
 #include "udp_handler.h"
-// #include "hal/lcd.h"
+#include "hal/lcd.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <stdbool.h>
@@ -197,19 +197,21 @@ void getUdpCommands(void)
         }  
         if(strcmp(command.messageRx, "play") == 0) {
                 // play audio function
+                (void) system("aplay test.wav");
         }
         if(strcmp(command.messageRx, "clear") == 0) {
                 // clear text display
-                // 
+                lcd_clear();
         }   
         if(strcmp(command.messageRx, "off") == 0) {
                 // stop the whole system
+
         }
         // sendResponseJST(command.messageRx, command.bytesRx);
 }
 
 //Close udp connection
-void closeConnectionT() 
+void closeConnectionT()
 {
         close(socketDescriptorT);
 }

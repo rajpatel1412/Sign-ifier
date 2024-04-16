@@ -27,25 +27,13 @@ int main()
 {
 
         initializeLCD();
-        captureThread_init(argc, argv);
-        // sleepForMs(10000);
-        // printf("/n/n---------------------------Ending Sleep-----------------------------/n/n");
-        bool shutdown = false;
-        while(true) {
-                if(shutdown) {
-                        captureThread_cleanup();
-                        lcd_cleanup();
-                }
-        }
-        
-        return 0;
+        capture_init();
+        sleepForMs(10000);
+        listenThread_init();
+        while(true) {}
+        capture_cleanup();
+        listenThread_cleanup();
 
-    
-    capture_init();
-    sleepForMs(10000);
-    listenThread_init();
-    while(true) {}
-    capture_cleanup();
-    listenThread_cleanup();
+        return 0;
 
 }

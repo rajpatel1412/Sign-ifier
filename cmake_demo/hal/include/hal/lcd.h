@@ -26,6 +26,6 @@ void initializeLCD();
 
 void lcd_cleanup(void);
 void lcd_display(const char toDisplay);
-void lcd_clear();
+void lcd_clear(void);
 
 #endif
