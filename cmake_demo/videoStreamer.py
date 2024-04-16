@@ -9,11 +9,17 @@ port=3000
 answer = 1
 
 
-cap = cv2.VideoCapture("udp://192.168.7.1:12345")   
-while(True): 
-    ret, frame = cap.read() 
+cap = cv2.VideoCapture("udp://192.168.7.1:12345")  
+
+ret,frame = cap.read()
+
+while ret: 
+    if not ret:
+        print("not ret")
+        continue
     cv2.imshow('frame', frame) 
     answer = answer + 1
+
     if(answer % 100 == 0):
         answerString = str(answer).encode()
         sock.sendto(answerString,(ip,port))
@@ -23,6 +29,9 @@ while(True):
     # desired button of your choice 
     if cv2.waitKey(1) & 0xFF == ord('q'): 
         break
+    
+    ret, frame = cap.read()
+    
 cap.release() 
 cv2.destroyAllWindows() 
 

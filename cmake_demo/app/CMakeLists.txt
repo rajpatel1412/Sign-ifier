@@ -5,7 +5,7 @@ file(GLOB MY_SOURCES "src/*.c")
 add_executable(webcam_capture ${MY_SOURCES})
 
 # Make use of the HAL library
-# target_link_libraries(webcam_capture LINK_PRIVATE hal)
+target_link_libraries(webcam_capture LINK_PRIVATE hal)
 
 # PTHREAD support
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
