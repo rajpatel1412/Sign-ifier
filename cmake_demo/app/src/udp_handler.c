@@ -17,6 +17,7 @@
 #include <linux/videodev2.h>
 
 #include "udp_handler.h"
+// #include "hal/lcd.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <stdbool.h>
@@ -164,7 +165,7 @@ int sendResponseJST(const void *str, int size)
 }
 
 
-// recieve inference from pyhton
+// recieve inference from python
 void getAnswer(void)
 {
 //         //Receive Data
@@ -195,7 +196,14 @@ void getUdpCommands(void)
         }  
         if(strcmp(command.messageRx, "play") == 0) {
                 // play audio function
+        }
+        if(strcmp(command.messageRx, "clear") == 0) {
+                // clear text display
+                // 
         }   
+        if(strcmp(command.messageRx, "off") == 0) {
+                // stop the whole system
+        }
         // sendResponseJST(command.messageRx, command.bytesRx);
 }
 

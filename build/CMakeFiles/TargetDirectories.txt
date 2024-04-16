@@ -1,5 +1,0 @@
-/home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles/rebuild_cache.dir
-/home/raj/cmpt433/work/project/Sign-ifier/build/CMakeFiles/edit_cache.dir
-/home/raj/cmpt433/work/project/Sign-ifier/build/app/CMakeFiles/rebuild_cache.dir
-/home/raj/cmpt433/work/project/Sign-ifier/build/app/CMakeFiles/edit_cache.dir
-/home/raj/cmpt433/work/project/Sign-ifier/build/app/CMakeFiles/webcam_capture.dir
