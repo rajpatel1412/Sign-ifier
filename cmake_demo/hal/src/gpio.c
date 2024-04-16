@@ -2,8 +2,11 @@
 /* This code is intentionally left with room for improvement.
    Update this interface as needed. */
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include "hal/gpio.h"
 
+//LCD
 #define D4_DIRECTION "/sys/class/gpio/gpio66/direction"
 #define D4_VALUE "/sys/class/gpio/gpio66/value"
 
@@ -21,6 +24,11 @@
 
 #define E_DIRECTION "/sys/class/gpio/gpio67/direction"
 #define E_VALUE "/sys/class/gpio/gpio67/value"
+
+//BUTTONS
+#define RED_DIRECTION "/sys/class/gpio/gpio60/direction"
+#define BLUE_DIRECTION "/sys/class/gpio/gpio30/direction"
+#define YELLOW_DIRECTION "/sys/class/gpio/gpio31/direction"
 
 static void writeToFile(const char* fileName, const char* value)
 {
@@ -52,6 +60,15 @@ void GPIO_writeDirection(int gpio, char* dir)
         case E_GPIO_NUMBER:
             fileName = E_DIRECTION;
             break;
+        case RED_NUMBER:
+            fileName = RED_DIRECTION;
+            break;
+        case BLUE_NUMBER:
+            fileName = BLUE_DIRECTION;
+            break;
+        case YELLOW_NUMBER:
+            fileName = YELLOW_DIRECTION;
+            break;
     }
     writeToFile(fileName, dir);
 }
@@ -81,4 +98,34 @@ void GPIO_writeValue(int gpio, char* val)
             break;
     }
     writeToFile(fileName, val);
+}
+
+void runCommand(char command[])
+{
+    FILE *pipe = popen(command, "r");
+    char buffer[1024];
+    while (!feof(pipe) && !ferror(pipe))
+    {
+        if (fgets(buffer, sizeof(buffer), pipe) == NULL)
+            break;
+    }
+
+    int exitCode = WEXITSTATUS(pclose(pipe));
+    if (exitCode != 0)
+    {
+        perror("Unable to execute command:");
+        printf(" command: %s\n", command);
+        printf(" exit code: %d\n", exitCode);
+    }
+}
+
+void sleepForMs(long long delayInMs)
+{
+    const long long NS_PER_MS = 1000 * 1000;
+    const long long NS_PER_SECOND = 1000000000;
+    long long delayNs = delayInMs * NS_PER_MS;
+    int seconds = delayNs / NS_PER_SECOND;
+    int nanoseconds = delayNs % NS_PER_SECOND;
+    struct timespec reqDelay = {seconds, nanoseconds};
+    nanosleep(&reqDelay, (struct timespec *) NULL);
 }

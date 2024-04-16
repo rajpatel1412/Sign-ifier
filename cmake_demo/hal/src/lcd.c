@@ -9,63 +9,50 @@
 #include "hal/gpio.h"
 
 static pthread_t lcdThread_id;
+pthread_mutex_t mutex;
 bool lcd_loopCondition = true;
+char signedLetter;
 char message[1024];
+int mpos;
 bool isDisplaying;
-
-void runCommand(char command[])
-{
-    FILE *pipe = popen(command, "r");
-    char buffer[BUFFER_LENGTH];
-    while (!feof(pipe) && !ferror(pipe))
-    {
-        if (fgets(buffer, sizeof(buffer), pipe) == NULL)
-            break;
-    }
-
-    int exitCode = WEXITSTATUS(pclose(pipe));
-    if (exitCode != 0)
-    {
-        perror("Unable to execute command:");
-        printf(" command: %s\n", command);
-        printf(" exit code: %d\n", exitCode);
-    }
-}
-
-static void sleepForMs(long long delayInMs)
-{
-    const long long NS_PER_MS = 1000 * 1000;
-    const long long NS_PER_SECOND = 1000000000;
-    long long delayNs = delayInMs * NS_PER_MS;
-    int seconds = delayNs / NS_PER_SECOND;
-    int nanoseconds = delayNs % NS_PER_SECOND;
-    struct timespec reqDelay = {seconds, nanoseconds};
-    nanosleep(&reqDelay, (struct timespec *) NULL);
-}
 
 void *lcdThread(void *arg) {
     while(lcd_loopCondition) {
+        pthread_mutex_lock(&mutex);
         if (isDisplaying) {
-            char displayMessage[1024];
-            strncpy(displayMessage, message, sizeof(displayMessage) - 1);
-            displayMessage[sizeof(displayMessage) - 1] = '\0'; // Ensure null termination
-            writeMessage(displayMessage);
+            writeChar(signedLetter);
+
         }
         isDisplaying = false;
+        pthread_mutex_unlock(&mutex);
     }
     return arg;
 }
 
-void lcd_display(const char* toDisplay)
+void lcd_display(const char toDisplay)
 {
-    strncpy(message, toDisplay, sizeof(toDisplay) - 1);
-    message[sizeof(message) - 1] = '\0';
- 
+    if (mpos > 1024) {
+        printf("BUFFER OVERFLOW\n");
+    }
+    else {
+        message[mpos++] = toDisplay;
+        message[mpos] = '\0';
+    }
+
+    pthread_mutex_lock(&mutex);
+    signedLetter = toDisplay;
     isDisplaying = true;
+    pthread_mutex_unlock(&mutex);
+    char command[4096];
+    snprintf(command, 4096, "espeak \'%s\' -w test.wav", message);
+    runCommand(command);
 }
 
 void lcd_clear()
 {
+    memset(message, 0, 1024 * sizeof(char));
+    mpos = 0;
+
     // Set to command mode
     GPIO_writeValue(RS_GPIO_NUMBER, "0");
 
@@ -79,6 +66,8 @@ void lcd_clear()
 
 void initializeLCD()
 {
+    mpos = 0;
+
     // Set every GPIO pin to OUTPUT
     GPIO_writeDirection(RS_GPIO_NUMBER, "out");
     GPIO_writeDirection(E_GPIO_NUMBER, "out");
@@ -147,6 +136,7 @@ void initializeLCD()
 	// Pull RS up to write data.
 	GPIO_writeValue(RS_GPIO_NUMBER, "1");
 
+    pthread_mutex_init(&mutex, NULL);
     pthread_create(&lcdThread_id, NULL, &lcdThread, NULL);
 }
 
@@ -161,22 +151,15 @@ void lcd_cleanup(void)
     GPIO_writeValue(RS_GPIO_NUMBER, "1");
 
     lcd_loopCondition = false;
+    pthread_mutex_destroy(&mutex);
     pthread_join(lcdThread_id, NULL);
 }
 
 void writeMessage(char* msg)
 {
-    // printf("Writing \"%s\" to LCD...\n", msg);
     for (size_t i = 0; i < strlen(msg); i++) {
         writeChar(msg[i]);
     }
-    char command[4096];
-    memset(command, 0, 4096 * sizeof(char));
-    snprintf(command, 4096, "espeak \'%s\' -w test.wav", msg);
-    // printf("command: %s", command);
-    runCommand(command);
-    sleepForMs(500);
-    runCommand("aplay test.wav");
 }
 
 void writeChar(char c)
