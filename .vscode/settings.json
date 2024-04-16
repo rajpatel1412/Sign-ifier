@@ -1,5 +1,5 @@
 {
-    "cmake.sourceDirectory": "/home/psalniko/cmpt433/work/Sign-ifier/cmake_demo",
+    "cmake.sourceDirectory": "/home/raj/cmpt433/work/Sign-ifier/cmake_demo",
     "files.associations": {
         "time.h": "c",
         "lcd.h": "c"
