@@ -63,72 +63,70 @@ while True:
 
     # cap = cv2.VideoCapture("./test_A3.mov")
     # while not cap.isOpened():
+    # print("Wait for the header")
     #     cap = cv2.VideoCapture("./test_A3.mov")
     #     cv2.waitKey(1000)
-    #     print("Wait for the header")
 
     # cap = cv2.VideoCapture(1)
 
 
 
     # while flag:
-    for h in range(1):
+    # for h in range(1):
         # flag, frame = cap.read()
         # print("new iteration")
-        data_aux = []
-        x_ = []
-        y_ = []
+    data_aux = []
+    x_ = []
+    y_ = []
 
-    # skip a number of frames for efficiency
-        for i in range(10):
-            flag, frame = cap.read()
+# skip a number of frames for efficiency
+    for i in range(5):
+        flag, frame = cap.read()
 
-        # if not flag:
-        #     cv2.waitKey(300)
-        #     continue
+    # if not flag:
+    #     cv2.waitKey(300)
+    #     continue
 
-        # sys.stdout.flush()
+    # sys.stdout.flush()
 
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            results = hands.process(frame_rgb)
-            if results.multi_hand_landmarks:
-                for hand_landmarks in results.multi_hand_landmarks:
-                    mp_drawing.draw_landmarks(
-                        frame,  # image to draw
-                        hand_landmarks,  # model output
-                        mp_hands.HAND_CONNECTIONS,  # hand connections
-                        mp_drawing_styles.get_default_hand_landmarks_style(),
-                        mp_drawing_styles.get_default_hand_connections_style())
+        # results = hands.process(frame_rgb)
+        # if results.multi_hand_landmarks:
+        #     # for hand_landmarks in results.multi_hand_landmarks:
+        #     #     mp_drawing.draw_landmarks(
+        #     #         frame,  # image to draw
+        #     #         hand_landmarks,  # model output
+        #     #         mp_hands.HAND_CONNECTIONS,  # hand connections
+        #     #         mp_drawing_styles.get_default_hand_landmarks_style(),
+        #     #         mp_drawing_styles.get_default_hand_connections_style())
 
-                for hand_landmarks in results.multi_hand_landmarks:
-                    for i in range(len(hand_landmarks.landmark)):
-                        x = hand_landmarks.landmark[i].x
-                        y = hand_landmarks.landmark[i].y
+        #     for hand_landmarks in results.multi_hand_landmarks:
+        #         for i in range(len(hand_landmarks.landmark)):
+        #             x = hand_landmarks.landmark[i].x
+        #             y = hand_landmarks.landmark[i].y
 
-                        x_.append(x)
-                        y_.append(y)
+        #             x_.append(x)
+        #             y_.append(y)
 
-                    for i in range(len(hand_landmarks.landmark)):
-                        x = hand_landmarks.landmark[i].x
-                        y = hand_landmarks.landmark[i].y
-                        data_aux.append(x - min(x_))
-                        data_aux.append(y - min(y_))
+        #         for i in range(len(hand_landmarks.landmark)):
+        #             x = hand_landmarks.landmark[i].x
+        #             y = hand_landmarks.landmark[i].y
+        #             data_aux.append(x - min(x_))
+        #             data_aux.append(y - min(y_))
 
-                if len(data_aux) > 42:
-                    continue
-                prediction = model.predict([np.asarray(data_aux)])
+            # if len(data_aux) > 42:
+            #     continue
+            # prediction = model.predict([np.asarray(data_aux)])
 
-                if int(prediction[0]) > num_symbols - 1:
-                    continue
+            # if int(prediction[0]) > num_symbols - 1:
+            #     continue
 
-                predicted_character = labels_dict[int(prediction[0])]
-                predictions[int(prediction[0])] += 1
-            cv2.imshow('frame',frame)
-            cv2.waitKey(10)
+            # predicted_character = labels_dict[int(prediction[0])]
+            # predictions[int(prediction[0])] += 1
 
-        if 0xFF == ord('q'): 
-            break
+        cv2.imshow('frame',frame)
+        cv2.waitKey(25)
 
 
     index_max = np.argmax(predictions)
