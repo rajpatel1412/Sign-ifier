@@ -7,6 +7,7 @@
 #define RPORT_T 1234
 #define PYPORT_T 12345
 #define PORT_LISTEN_PY_T 12346
+#define PORT_PY_SHUTDOWN_SIGNAL 4000
 
 
 #define MAX_LEN 4096

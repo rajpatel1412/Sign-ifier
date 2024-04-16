@@ -38,6 +38,7 @@ static struct sockaddr_in sinJST; // sending commands to website
 static struct sockaddr_in sinRemotePyT;  // streaming to python
 static struct sockaddr_in sinRemotePy2T; // listening from python
 static struct sockaddr_in sinRemoteJST; // sending commands to website
+static struct sockaddr_in sinRemotePyShutdownSignal; // send shutdown signal to Python
 static MessageRx answer;
 static MessageRx command;
 bool loopCondition = true;
@@ -117,6 +118,14 @@ void openConnectionT()
 
         // for serving from host
         sinRemotePy2T.sin_addr.s_addr = inet_addr("192.168.7.1");
+
+        // For sending Python shutdown signal
+        memset(&sinRemotePyShutdownSignal, 0, sizeof(sinRemotePyShutdownSignal));
+
+        sinRemotePyShutdownSignal.sin_family = AF_INET;
+        sinRemotePyShutdownSignal.sin_port = htons(PORT_PY_SHUTDOWN_SIGNAL);
+
+        sinRemotePyShutdownSignal.sin_addr.s_addr = inet_addr("192.168.7.1");
 }
 
 //Send video frame using udp packet
@@ -164,7 +173,7 @@ int sendResponseJST(const void *str, int size)
 }
 
 
-// recieve inference from pyhton
+// recieve inference from python
 void getAnswer(void)
 {
 //         //Receive Data
@@ -195,7 +204,13 @@ void getUdpCommands(void)
         }  
         if(strcmp(command.messageRx, "play") == 0) {
                 // play audio function
-        }   
+        }
+        if(strcmp(command.messageRx, "clear") == 0) {
+                // clear the screen
+        }
+        if(strcmp(command.messageRx, "off") == 0) {
+                // stop the program
+        }
         // sendResponseJST(command.messageRx, command.bytesRx);
 }
 

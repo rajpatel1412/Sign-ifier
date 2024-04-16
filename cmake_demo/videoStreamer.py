@@ -10,6 +10,12 @@ port=3000
 answer = 1
 # sock.bind((ip,port)) 
 
+recv_shutdown = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+recv_shutdown_port = 4000
+recv_shutdown.bind(ip,port)
+
+recv_shutdown.connect(ip,recv_shutdown_port)
+
 def sendAnswer():
      while(True):
         sock.sendto(answer,(ip,port))
@@ -21,8 +27,13 @@ def sendAnswer():
 
 cap = cv2.VideoCapture("udp://192.168.7.1:12345")   
 while(True): 
-    ret, frame = cap.read() 
-    cv2.imshow('frame', frame) 
+
+    data = recv_shutdown.recv(5)
+    if(data.decode() == "stop"):
+        break
+
+    # ret, frame = cap.read() 
+    # cv2.imshow('frame', frame) 
     # global answer 
     # answer = b'answer'
     answer = answer + 1
@@ -47,5 +58,5 @@ cap.release()
 cv2.destroyAllWindows() 
 
 # replyThread.join()
-
+# sendto
 
