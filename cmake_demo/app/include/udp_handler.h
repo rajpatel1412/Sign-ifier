@@ -13,7 +13,7 @@
 
 #define MAX_LEN 256
 
-bool udp_isStopping(void);
+bool udp_isRunning(void);
 void openConnectionT();
 int sendResponseT(const void *str, int size);
 int sendResponsePyT(const void *str, int size);

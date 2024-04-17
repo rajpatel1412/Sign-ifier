@@ -32,7 +32,7 @@ typedef struct{
     int bytesRx;
 } MessageRx;
 
-static bool stopping = false;
+static bool running = true;
 
 static struct sockaddr_in sinT; // sending video
 static struct sockaddr_in sinRemoteT; // sending video to website
@@ -44,7 +44,6 @@ static struct sockaddr_in sinRemotePy2T; // listening from python
 static struct sockaddr_in sinRemoteJST; // sending commands to website
 static MessageRx answer;
 static MessageRx command;
-bool loopCondition = true;
 pthread_t udpThreadID;
 static int socketDescriptorJST; // sending other data to website
 char displayString[1024];
@@ -53,9 +52,9 @@ int displayPosition = 0;
 
 static int socketDescriptorT; // sending video
 
-bool udp_isStopping()
+bool udp_isRunning(void)
 {
-        return stopping;
+        return running;
 }
 
 //Initialize UDP connection
@@ -203,23 +202,30 @@ void getUdpCommands(void)
 
         if(strcmp(command.messageRx, "inference") == 0) {
                 if (displayPosition < 16) {
-                        displayString[displayPosition] = 
-                        sendResponseJST(answer.messageRx, answer.bytesRx);
+                        displayString[displayPosition] = answer.messageRx[0];
+                        sendResponseJST(displayString, answer.bytesRx);
+                        // lcd write message
+                        displayPosition++;
                 }
                 
         }  
         if(strcmp(command.messageRx, "play") == 0) {
                 // play audio function
-                (void) system("aplay test.wav");
+
+                // play audio
+                displayString[0] = '/0';
+                displayPosition = 0;
+                // (void) system("aplay test.wav");
         }
         if(strcmp(command.messageRx, "clear") == 0) {
                 // clear text display
-                answer.messageRx[0] = '\0';
+                displayString[0] = '\0';
+                displayPosition = 0;
                 lcd_clear();
         }   
         if(strcmp(command.messageRx, "off") == 0) {
                 // stop the whole system
-                stopping = true;
+                running = false;
 
         }
         // sendResponseJST(command.messageRx, command.bytesRx);
@@ -234,7 +240,7 @@ void closeConnectionT()
 
 void* listenThread(void* args)
 {
-        while(true) {
+        while(running) {
                 getAnswer();
                 getUdpCommands();
         }  
@@ -249,7 +255,7 @@ void listenThread_init(void)
 
 void listenThread_cleanup(void)
 {
-        loopCondition = false;
+        running = false;
         pthread_join(udpThreadID, NULL);
 }
 
