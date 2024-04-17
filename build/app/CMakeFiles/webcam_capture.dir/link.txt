@@ -1,0 +1,1 @@
+/usr/bin/arm-linux-gnueabihf-gcc -g -fsanitize=address CMakeFiles/webcam_capture.dir/src/capture.c.o CMakeFiles/webcam_capture.dir/src/main.c.o CMakeFiles/webcam_capture.dir/src/udp_handler.c.o -o webcam_capture  ../hal/libhal.a -pthread 

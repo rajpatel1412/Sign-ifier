@@ -11,7 +11,7 @@
 #define PORT_LISTEN_PY_T 12346
 
 
-#define MAX_LEN 4096
+#define MAX_LEN 256
 
 bool udp_isStopping(void);
 void openConnectionT();

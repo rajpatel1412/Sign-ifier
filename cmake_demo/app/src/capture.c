@@ -39,6 +39,17 @@
 #include <pthread.h>
 pthread_t capture_thread;
 
+static void sleepForMs(long long delayInMs)
+{
+    const long long NS_PER_MS = 1000 * 1000;
+    const long long NS_PER_SECOND = 1000000000;
+    long long delayNs = delayInMs * NS_PER_MS;
+    int seconds = delayNs / NS_PER_SECOND;
+    int nanoseconds = delayNs % NS_PER_SECOND;
+    struct timespec reqDelay = {seconds, nanoseconds};
+    nanosleep(&reqDelay, (struct timespec *) NULL);
+}
+
 ///////////////////////////////////////
 // #include <sys/socket.h>
 // #include <netinet/in.h>
@@ -136,6 +147,7 @@ static void process_image(const void *p, int size)
         if (out_buf) {
                 sendResponseT(p, size);
                 sendResponsePyT(p, size);
+                sleepForMs(250);
         }
 
         fflush(stderr);
@@ -558,14 +570,22 @@ static void init_device(void)
 	fprintf(stderr, "Force Format %d\n", force_format);
         if (force_format) {
 		if (force_format==2){
-             		fmt.fmt.pix.width       = 720;     
-           		fmt.fmt.pix.height      = 720;  
+             		// fmt.fmt.pix.width       = 720;     
+           		// fmt.fmt.pix.height      = 720;  
+  			// fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
+                        // fmt.fmt.pix.field = V4L2_FIELD_NONE;
+                        fmt.fmt.pix.width       = 360;     
+           		fmt.fmt.pix.height      = 240;  
   			fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
                         fmt.fmt.pix.field = V4L2_FIELD_NONE;
 		}
 		else if(force_format==1){
-			fmt.fmt.pix.width	= 640;
-			fmt.fmt.pix.height	= 480;
+			// fmt.fmt.pix.width	= 640;
+			// fmt.fmt.pix.height	= 480;
+			// fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
+                        // fmt.fmt.pix.field = V4L2_FIELD_NONE;
+                        fmt.fmt.pix.width	= 360;
+			fmt.fmt.pix.height	= 240;
 			fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
                         fmt.fmt.pix.field = V4L2_FIELD_NONE;
 		}

@@ -47,6 +47,8 @@ static MessageRx command;
 bool loopCondition = true;
 pthread_t udpThreadID;
 static int socketDescriptorJST; // sending other data to website
+char displayString[1024];
+int displayPosition = 0;
 //
 
 static int socketDescriptorT; // sending video
@@ -200,7 +202,11 @@ void getUdpCommands(void)
         printf("%s\n", command.messageRx);
 
         if(strcmp(command.messageRx, "inference") == 0) {
-                sendResponseJST(answer.messageRx, answer.bytesRx);
+                if (displayPosition < 16) {
+                        displayString[displayPosition] = 
+                        sendResponseJST(answer.messageRx, answer.bytesRx);
+                }
+                
         }  
         if(strcmp(command.messageRx, "play") == 0) {
                 // play audio function
