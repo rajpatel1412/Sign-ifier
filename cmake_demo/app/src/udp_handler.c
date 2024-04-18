@@ -45,6 +45,8 @@ static struct sockaddr_in sinRemoteJST; // sending commands to website
 static MessageRx answer;
 static MessageRx command;
 pthread_t udpThreadID;
+// pthread_t pythonThreadID;
+pthread_mutex_t displayMutex = PTHREAD_MUTEX_INITIALIZER;
 static int socketDescriptorJST; // sending other data to website
 char displayString[1024];
 int displayPosition = 0;
@@ -86,11 +88,7 @@ void openConnectionT()
         sinRemoteT.sin_family = AF_INET;
         sinRemoteT.sin_port = htons(RPORT_T);
 
-        //serving from BBG - very slow
-        // sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.2"); 
-
-        // for serving from host
-        sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.1");
+        //serving from BBG - very slow.7.1");
 
 
 
@@ -100,14 +98,6 @@ void openConnectionT()
 
         //serving from BBG - very slow
         // sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.2"); 
-
-        // for serving from host
-        sinRemoteJST.sin_addr.s_addr = inet_addr("192.168.7.1");
-
-
-
-        //  sedning to python
-        sinRemotePyT.sin_family = AF_INET;
         sinRemotePyT.sin_port = htons(PYPORT_T);
 
         // serving from BBG - very slow
@@ -187,7 +177,7 @@ void getAnswer(void)
     unsigned int sin_len = sizeof(sinRemotePy2T);
     answer.bytesRx = recvfrom(socketDescriptorT, answer.messageRx, MAX_LEN -1, 0, (struct sockaddr *) &sinRemotePy2T, &sin_len);
 //     answer.messageRx[answer.bytesRx] = 0; //Null terminated (string)
-    printf("%s\n", answer.messageRx);
+//     printf("%s\n", answer.messageRx);
 //     sendResponseJST(answer.messageRx, answer.bytesRx);
 
 }
@@ -201,27 +191,42 @@ void getUdpCommands(void)
         printf("%s\n", command.messageRx);
 
         if(strcmp(command.messageRx, "inference") == 0) {
-                if (displayPosition < 16) {
-                        displayString[displayPosition] = answer.messageRx[0];
-                        sendResponseJST(displayString, answer.bytesRx);
-                        // lcd write message
-                        displayPosition++;
-                }
+                // if (displayPosition < 16) {
+                        getAnswer();
+                        // if(strcmp(answer.messageRx, "") != 0) {
+                        pthread_mutex_lock(&displayMutex);
+                                displayString[displayPosition++] = answer.messageRx[0];
+                                displayString[displayPosition] = '\0';
+                                printf("%s\n", displayString);
+                                sendResponseJST(displayString, displayPosition);
+                                // lcd write message
+                                lcd_display(answer.messageRx[0]);
+                        pthread_mutex_unlock(&displayMutex);
+
+                        // }
+                        // else {
+                                
+                        // }
+                        
+                // }
                 
         }  
         if(strcmp(command.messageRx, "play") == 0) {
                 // play audio function
 
                 // play audio
-                displayString[0] = '/0';
+                displayString[0] = '\0';
                 displayPosition = 0;
                 // (void) system("aplay test.wav");
         }
         if(strcmp(command.messageRx, "clear") == 0) {
                 // clear text display
-                displayString[0] = '\0';
-                displayPosition = 0;
-                lcd_clear();
+                pthread_mutex_lock(&displayMutex);
+                        // displayString[0] = '\0';
+                        memset(displayString, 0, 1024 * sizeof(char));
+                        displayPosition = 0;
+                        lcd_clear();
+                pthread_mutex_unlock(&displayMutex);
         }   
         if(strcmp(command.messageRx, "off") == 0) {
                 // stop the whole system
@@ -238,24 +243,54 @@ void closeConnectionT()
 }
 
 
-void* listenThread(void* args)
+void* listenUDPThread(void* args)
 {
         while(running) {
-                getAnswer();
+                // getAnswer();
                 getUdpCommands();
         }  
         // getAnswer();
         return args;
 }
 
-void listenThread_init(void)
+void listenUDPThread_init(void)
 {
-        pthread_create(&udpThreadID, NULL, listenThread, NULL);
+        pthread_create(&udpThreadID, NULL, listenUDPThread, NULL);
 }
 
-void listenThread_cleanup(void)
+void listenUDPThread_cleanup(void)
 {
         running = false;
         pthread_join(udpThreadID, NULL);
 }
+
+// void* listenPyThread(void* args)
+// {
+//         while(running) {
+//                 getAnswer();
+//                 // getUdpCommands();
+//                 pthread_mutex_lock(&displayMutex);
+//                 for(int i = 0; answer.messageRx[i] != '\0'; i++) {
+//                         displayString[displayPosition++] = answer.messageRx[i];
+//                         lcd_display(answer.messageRx[i]);        
+//                 }
+//                 displayString[displayPosition] = '\0';
+//                 printf("%s\n", displayString);
+//                 pthread_mutex_unlock(&displayMutex);
+                
+//         }  
+//         // getAnswer();
+//         return args;
+// }
+
+// void listenPyThread_init(void)
+// {
+//         pthread_create(&pythonThreadID, NULL, listenPyThread, NULL);
+// }
+
+// void listenPyThread_cleanup(void)
+// {
+//         running = false;
+//         pthread_join(pythonThreadID, NULL);
+// }
 

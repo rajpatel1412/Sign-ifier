@@ -19,8 +19,10 @@ int sendResponseT(const void *str, int size);
 int sendResponsePyT(const void *str, int size);
 void getAnswer(void);
 void closeConnectionT(); 
-void listenThread_init(void);
-void listenThread_cleanup(void);
+void listenUDPThread_init(void);
+void listenUDPThread_cleanup(void);
 void getUdpCommands(void);
+// void listenPyThread_init(void);
+// void listenPyThread_cleanup(void);
 
 #endif

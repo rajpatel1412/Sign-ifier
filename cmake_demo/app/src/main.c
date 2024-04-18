@@ -1,6 +1,7 @@
 #include "capture.h"
 
 #include "hal/lcd.h"
+#include "hal/button.h"
 #include <time.h>
 #include "udp_handler.h"
 
@@ -28,11 +29,13 @@ int main()
 
         initializeLCD();
         capture_init();
-        sleepForMs(10000);
-        listenThread_init();
+        initializeButt();
+        sleepForMs(1);
+        listenUDPThread_init();
+        // listenPyThread_init();
         while(udp_isRunning()) {}
         capture_cleanup();
-        listenThread_cleanup();
+        listenUDPThread_cleanup();
 
         return 0;
 

@@ -17,7 +17,7 @@ $( document ).ready(function() {
         }
     });
 
-    window.setInterval(function() {sendCommandViaUDP("inference")}, 1000);
+    window.setInterval(function() {sendCommandViaUDP("inference")}, 3000);
 
     $('#play').click(function(){
 		sendCommandViaUDP("play");

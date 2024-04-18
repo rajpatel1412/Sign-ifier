@@ -6,6 +6,7 @@ import numpy as np
 
 import sys
 import socket
+import time
 
 # target_ip = '127.0.0.1'
 # target_ip = '192.168.1.111'
@@ -25,13 +26,13 @@ hands = mp_hands.Hands(static_image_mode=True, min_detection_confidence=0.3)
 num_symbols = 30
 
 labels_dict = {
-    0: '3', 1: '4',
-    2: 'A', 3: 'B', 4: 'C', 5: 'D', 6: 'E', 7: 'F', 8: 'G', 9: 'H', 
-    10: 'I', 11: 'K', 12: 'L', 13: 'M', 14: 'N', 15: 'O', 16: 'P', 
-    17: 'Q', 18: 'R', 19: 'S', 20: 'T', 21: 'U', 22: 'V', 23: 'W', 
-    24: 'X', 25: 'Y', 
-    26: 'ME', 27: 'WELCOME', 28: 'OUR', 
-    29: 'DEMONSTRATION'
+    0: '.', 1: '3', 2: '4',
+    3: 'A', 4: 'B', 5: 'C', 6: 'D', 7: 'E', 8: 'F', 9: 'G', 10: 'H', 
+    11: 'I', 12: 'K', 13: 'L', 14: 'M', 15: 'N', 16: 'O', 17: 'P', 
+    18: 'Q', 19: 'R', 20: 'S', 21: 'T', 22: 'U', 23: 'V', 24: 'W', 
+    25: 'X', 26: 'Y', 
+    27: 'ME', 28: 'WELCOME', 29: 'OUR', 
+    30: 'DEMONSTRATION'
 }
 
 import socket
@@ -56,7 +57,7 @@ ip="192.168.7.2"
 port=3000
 answer = 1
 
-num_inferences = 3
+num_inferences = 12
 
 cap = cv2.VideoCapture("udp://192.168.7.1:12345?overrun_nonfatal=1&fifo_size=50000000")   
 
@@ -78,6 +79,8 @@ while flag:
     # for h in range(1):
         # flag, frame = cap.read()
         # print("new iteration")
+
+    start = time.time()
     answer = answer + 1
     if not flag:
         break
@@ -139,12 +142,16 @@ while flag:
     message = labels_dict[index_max]
     # print(message)
     # if answer % 100 == 0:
-    print(message)
-    sock.sendto(str(message).encode(), (ip,port))
+    if(message != '.'):
+        print(str(answer) + ' ' + message)
+        sock.sendto(str(message).encode(), (ip,port))
+    end = time.time()
+
+    print(str(end - start))
     # cv2.imshow('frame',frame)
     # cv2.waitKey(1)
 
-    # predictions = np.zeros(num_symbols)
+    predictions = np.zeros(num_symbols)
 
     # # just for testing
     # print("waiting...")

@@ -10,7 +10,7 @@
 stdbool.h
 -
 
-/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/capture.c
+/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/udp_handler.c
 stdio.h
 -
 stdlib.h
@@ -41,6 +41,22 @@ linux/videodev2.h
 -
 udp_handler.h
 /home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/udp_handler.h
+hal/lcd.h
+/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/app/src/hal/lcd.h
+sys/socket.h
+-
+netinet/in.h
+-
+stdbool.h
+-
+arpa/inet.h
+-
+netdb.h
+-
 pthread.h
+-
+
+/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo/hal/include/hal/lcd.h
+stdint.h
 -
 
