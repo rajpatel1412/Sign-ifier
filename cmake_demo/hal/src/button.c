@@ -49,15 +49,15 @@ void *buttonThread(void *arg) {
     return arg;
 }
 
-void initializeButt() {
-    GPIO_writeDirection(RED_NUMBER, "in");
-    GPIO_writeDirection(BLUE_NUMBER, "in");
-    GPIO_writeDirection(YELLOW_NUMBER, "in");
+void initializeButt(void) {
+    GPIO_writeDirection(RED_GPIO_NUMBER, "in");
+    GPIO_writeDirection(BLUE_GPIO_NUMBER, "in");
+    GPIO_writeDirection(YELLOW_GPIO_NUMBER, "in");
 
     pthread_create(&buttonThread_id, NULL, &buttonThread, NULL);
 }
 
-void butt_cleanup() {
+void butt_cleanup(void) {
     button_loopCondition = false;
     pthread_join(buttonThread_id, NULL);
 }

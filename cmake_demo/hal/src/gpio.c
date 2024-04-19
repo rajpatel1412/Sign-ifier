@@ -60,13 +60,13 @@ void GPIO_writeDirection(int gpio, char* dir)
         case E_GPIO_NUMBER:
             fileName = E_DIRECTION;
             break;
-        case RED_NUMBER:
+        case RED_GPIO_NUMBER:
             fileName = RED_DIRECTION;
             break;
-        case BLUE_NUMBER:
+        case BLUE_GPIO_NUMBER:
             fileName = BLUE_DIRECTION;
             break;
-        case YELLOW_NUMBER:
+        case YELLOW_GPIO_NUMBER:
             fileName = YELLOW_DIRECTION;
             break;
     }

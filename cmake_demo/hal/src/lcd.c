@@ -58,7 +58,7 @@ void lcd_display(const char toDisplay)
     runCommand(command);
 }
 
-void lcd_clear()
+void lcd_clear(void)
 {
     memset(message, 0, 1024 * sizeof(char));
     mpos = 0;
@@ -74,7 +74,7 @@ void lcd_clear()
 	GPIO_writeValue(RS_GPIO_NUMBER, "1");
 }
 
-void initializeLCD()
+void initializeLCD(void)
 {
     mpos = 0;
 
