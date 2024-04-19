@@ -1,18 +1,19 @@
+# A program which uses the model created from the previous train_classifier.py file
+# to make inferences on which ASL symbol is held up, if any, on the webcam video.
+# This code has been adapted from Computer Vision Engineer's video
+# to work with video over a UDP connection, as well as made more robust/reliable
+# for our uses by requiring an argmax of a number of inferences before an output is given.
+# https://www.youtube.com/watch?v=MJCSjXepaAM&t=2991s
+
 import pickle
 
 import cv2
 import mediapipe as mp
 import numpy as np
 
-import sys
 import socket
 import time
 
-# target_ip = '127.0.0.1'
-# target_ip = '192.168.1.111'
-# target_port = 42069
-
-# udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 model_dict = pickle.load(open('./model.p', 'rb'))
 model = model_dict['model']
@@ -24,7 +25,7 @@ mp_drawing_styles = mp.solutions.drawing_styles
 hands = mp_hands.Hands(static_image_mode=True, min_detection_confidence=0.3)
 
 num_symbols = 31
-
+# '.' here is not a predicted symbol. It is a 'default' for when no inference has been made
 labels_dict = {
     0: '.', 1: '3', 2: '4',
     3: 'A', 4: 'B', 5: 'C', 6: 'D', 7: 'E', 8: 'F', 9: 'G', 10: 'H', 
@@ -32,26 +33,11 @@ labels_dict = {
     18: 'Q', 19: 'R', 20: 'S', 21: 'T', 22: 'U', 23: 'V', 24: 'W', 
     25: 'X', 26: 'Y', 
     27: 'ME', 28: 'WELCOME', 29: 'OUR', 
-    # 30: 'DEMONSTRATION'
     30: 'DEMO'
 }
 
-import socket
-
-# UDP_IP = "192.168.7.1"
-# UDP_PORT = 12345
-
-
-# sock = socket.socket(socket.AF_INET, # Internet
-#                      socket.SOCK_DGRAM) # UDP
 
 predictions = np.zeros(num_symbols)
-# while True:
-
-# TODO: implement something that reads videos as if they were in a queue
-# within a directory. There should always be a short clip to process
-# but obviously the program should still just idle if not.
-# If a sign is recognized in the video then process as normal, otherwise just idle.
 
 sock = socket.socket(socket.AF_INET , socket.SOCK_DGRAM) 
 ip="192.168.7.2"   
@@ -66,21 +52,6 @@ flag,frame = cap.read()
 
 while flag:
 
-    # cap = cv2.VideoCapture("./test_A3.mov")
-    # while not cap.isOpened():
-    # print("Wait for the header")
-    #     cap = cv2.VideoCapture("./test_A3.mov")
-    #     cv2.waitKey(1000)
-
-    # cap = cv2.VideoCapture(1)
-
-
-
-    # while flag:
-    # for h in range(1):
-        # flag, frame = cap.read()
-        # print("new iteration")
-
     start = time.time()
     answer = answer + 1
     if not flag:
@@ -93,13 +64,11 @@ while flag:
         x_ = []
         y_ = []
 
-
-        # sys.stdout.flush()
-
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         results = hands.process(frame_rgb)
         if results.multi_hand_landmarks:
+            # (Optional) draw hand landmarks for a video output in VLC (must uncomment imshow below)
             # for hand_landmarks in results.multi_hand_landmarks:
             #     mp_drawing.draw_landmarks(
             #         frame,  # image to draw
@@ -126,34 +95,29 @@ while flag:
                 continue
             prediction = model.predict([np.asarray(data_aux)])
 
+            # if prediction value is somehow larger than the max
             if int(prediction[0]) > num_symbols - 1:
                 continue
 
+            # add predicted character for this round
             predicted_character = labels_dict[int(prediction[0])]
             predictions[int(prediction[0])] += 1
 
 
 
     index_max = np.argmax(predictions)
-    # sys.stdout.flush()
-    # print(index_max)
 
     # send prediction to website
-    # message = "yo"
     message = labels_dict[index_max]
-    # print(message)
-    # if answer % 100 == 0:
+
     if(message != '.'):
-        for i in range(len(message)):
-            
+        for i in range(len(message)):            
             sock.sendto(str(message[i]).encode(), (ip,port))
-        # message = ''
+
         print(str(answer) + ' ' + message)
     end = time.time()
 
     print(str(end - start))
-    # cv2.imshow('frame',frame)
-    # cv2.waitKey(1)
 
     predictions = np.zeros(num_symbols)
 
@@ -161,6 +125,6 @@ while flag:
     # print("waiting...")
     # cv2.waitKey(2000)
     # print("Done.")
-# print("WE'RE DONE\N")
+
 cap.release()
 cv2.destroyAllWindows()
