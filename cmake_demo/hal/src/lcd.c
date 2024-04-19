@@ -16,6 +16,16 @@ char message[1024];
 int mpos;
 bool isDisplaying;
 
+char* returnDisplayString(void)
+{
+    return message;
+}
+
+int returnDisplayPos(void) 
+{
+    return mpos;
+}
+
 void *lcdThread(void *arg) {
     while(lcd_loopCondition) {
         pthread_mutex_lock(&mutex);

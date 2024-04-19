@@ -1,3 +1,5 @@
+# test script to communicate between C and python
+
 import cv2
 import socket
 import threading

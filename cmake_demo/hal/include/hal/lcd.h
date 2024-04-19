@@ -24,6 +24,9 @@ void writeMessage(char* msg);
 // Initialize the LCD
 void initializeLCD();
 
+char* returnDisplayString(void);
+int returnDisplayPos(void);
+
 void lcd_cleanup(void);
 void lcd_display(const char toDisplay);
 void lcd_clear(void);

@@ -10,11 +10,16 @@
  *
  *      This program is provided with the V4L2 API
  * see http://linuxtv.org/docs.php for more information
+ * 
  *
- * CMPT433
- * Minor Modification made by Yoonhong to add socket programming to send video data in udp packets
- * instead of adding video data to stdout. This has shown to improve the latency issues with using
- * this script
+ * CMPT433 - Team Solar script modification used here (Yoohong Lee) to send packets via
+ * UDP instead of writing them to the stdout buffer.
+ * 
+ * https://opencoursehub.cs.sfu.ca/bfraser/grav-cms/cmpt433/links/files/2022-student-howtos/StreamingWebcamFromBeagleBoneToNodeJSServer.pdf
+ * 
+ * Device set up
+ * https://opencoursehub.cs.sfu.ca/bfraser/grav-cms/cmpt433/links/files/2017-student-howtos/CapturingAndStreamingWebcamVideoOnBBG.pdf
+ * 
  */
 
 #include <stdio.h>
@@ -50,57 +55,6 @@ static void sleepForMs(long long delayInMs)
     nanosleep(&reqDelay, (struct timespec *) NULL);
 }
 
-///////////////////////////////////////
-// #include <sys/socket.h>
-// #include <netinet/in.h>
-// #include <stdbool.h>
-// #include <arpa/inet.h> 
-// #include <netdb.h> 
-
-// #define PORT_T 3000
-// #define RPORT_T 1234
-
-// static struct sockaddr_in sinT;
-// static struct sockaddr_in sinRemoteT;
-// static int socketDescriptorT;
-
-// //Initialize UDP connection
-// void openConnectionT() 
-// {
-//         memset(&sinT, 0, sizeof(sinT));
-//         sinT.sin_family = AF_INET;
-//         sinT.sin_addr.s_addr = htonl(INADDR_ANY);
-//         sinT.sin_port = htons(PORT_T);
-
-//         socketDescriptorT = socket(PF_INET, SOCK_DGRAM, 0);
-//         bind(socketDescriptorT, (struct sockaddr*) &sinT, sizeof(sinT));
-        
-//         sinRemoteT.sin_family = AF_INET;
-//         sinRemoteT.sin_port = htons(RPORT_T);
-//         sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.1");
-// }
-
-// //Send video frame using udp packet
-// int sendResponseT(const void *str, int size) 
-// {
-//         int packetSent = 0;
-//         sendto(socketDescriptorT,
-//                         str,
-//                         size,
-//                         0,
-//                         (struct sockaddr *) &sinRemoteT, 
-//                         sizeof(sinRemoteT)
-//                   );
-
-                
-//         return packetSent;
-// }
-
-// //Close udp connection
-// void closeConnectionT() 
-// {
-//         close(socketDescriptorT);
-// }
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
@@ -247,15 +201,6 @@ static int read_frame(void)
 
 static void mainloop(void)
 {
-        // unsigned int count;
-	// unsigned int loopIsInfinite = 0;
-
-        // if (frame_count == 0) loopIsInfinite = 1; //infinite loop
-	// count = frame_count;
-
-        // while ((count-- > 0) || loopIsInfinite) {
-
-        
         while (loopIsInfinite) {                
                 for (;;) {
                         fd_set fds;
@@ -570,20 +515,12 @@ static void init_device(void)
 	fprintf(stderr, "Force Format %d\n", force_format);
         if (force_format) {
 		if (force_format==2){
-             		// fmt.fmt.pix.width       = 720;     
-           		// fmt.fmt.pix.height      = 720;  
-  			// fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
-                        // fmt.fmt.pix.field = V4L2_FIELD_NONE;
                         fmt.fmt.pix.width       = 360;     
            		fmt.fmt.pix.height      = 240;  
   			fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
                         fmt.fmt.pix.field = V4L2_FIELD_NONE;
 		}
 		else if(force_format==1){
-			// fmt.fmt.pix.width	= 640;
-			// fmt.fmt.pix.height	= 480;
-			// fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
-                        // fmt.fmt.pix.field = V4L2_FIELD_NONE;
                         fmt.fmt.pix.width	= 360;
 			fmt.fmt.pix.height	= 240;
 			fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
@@ -665,10 +602,6 @@ void* capture(void* args)
         force_format=2;
         out_buf++;
 
-        // errno = 0;
-        // char opt = '0';
-        // frame_count = strtol(&opt, NULL, 0);
-        // if(errno) errno_exit(&opt);
         frame_count = 0;
 
         open_device();

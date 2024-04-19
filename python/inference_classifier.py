@@ -23,7 +23,7 @@ mp_drawing_styles = mp.solutions.drawing_styles
 
 hands = mp_hands.Hands(static_image_mode=True, min_detection_confidence=0.3)
 
-num_symbols = 30
+num_symbols = 31
 
 labels_dict = {
     0: '.', 1: '3', 2: '4',
@@ -32,7 +32,8 @@ labels_dict = {
     18: 'Q', 19: 'R', 20: 'S', 21: 'T', 22: 'U', 23: 'V', 24: 'W', 
     25: 'X', 26: 'Y', 
     27: 'ME', 28: 'WELCOME', 29: 'OUR', 
-    30: 'DEMONSTRATION'
+    # 30: 'DEMONSTRATION'
+    30: 'DEMO'
 }
 
 import socket
@@ -57,7 +58,7 @@ ip="192.168.7.2"
 port=3000
 answer = 1
 
-num_inferences = 12
+num_inferences = 20
 
 cap = cv2.VideoCapture("udp://192.168.7.1:12345?overrun_nonfatal=1&fifo_size=50000000")   
 
@@ -143,8 +144,11 @@ while flag:
     # print(message)
     # if answer % 100 == 0:
     if(message != '.'):
+        for i in range(len(message)):
+            
+            sock.sendto(str(message[i]).encode(), (ip,port))
+        # message = ''
         print(str(answer) + ' ' + message)
-        sock.sendto(str(message).encode(), (ip,port))
     end = time.time()
 
     print(str(end - start))

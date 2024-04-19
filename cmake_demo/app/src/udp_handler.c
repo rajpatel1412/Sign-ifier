@@ -1,3 +1,6 @@
+// Source: adapted from Team Solar streaming Guide
+// https://opencoursehub.cs.sfu.ca/bfraser/grav-cms/cmpt433/links/files/2022-student-howtos/StreamingWebcamFromBeagleBoneToNodeJSServer.pdf
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,30 +29,29 @@
 #include <pthread.h>
 
 
+// message information struct
 typedef struct{
     char messageRx[MAX_LEN];
-    char prevMessage[MAX_LEN];
     int bytesRx;
 } MessageRx;
 
-static bool running = true;
+static bool running = true; // loop control
 
 static struct sockaddr_in sinT; // sending video
 static struct sockaddr_in sinRemoteT; // sending video to website
 
 //
-static struct sockaddr_in sinJST; // sending commands to website
+static struct sockaddr_in sinJST; // sending/receiving commands to website
 static struct sockaddr_in sinRemotePyT;  // streaming to python
 static struct sockaddr_in sinRemotePy2T; // listening from python
-static struct sockaddr_in sinRemoteJST; // sending commands to website
-static MessageRx answer;
-static MessageRx command;
+static struct sockaddr_in sinRemoteJST; // sending/recieving commands to website
+static MessageRx answer; // message from python
+static MessageRx command; // message from node
+
+
 pthread_t udpThreadID;
-// pthread_t pythonThreadID;
 pthread_mutex_t displayMutex = PTHREAD_MUTEX_INITIALIZER;
-static int socketDescriptorJST; // sending other data to website
-char displayString[1024];
-int displayPosition = 0;
+static int socketDescriptorJST; // sending/recieving other data to website
 //
 
 static int socketDescriptorT; // sending video
@@ -62,7 +64,7 @@ bool udp_isRunning(void)
 //Initialize UDP connection
 void openConnectionT() 
 {       
-        // socket listening ffrom website
+        // socket streaming video to website and python
         memset(&sinT, 0, sizeof(sinT));
         sinT.sin_family = AF_INET;
         sinT.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -73,7 +75,7 @@ void openConnectionT()
 
 
         
-        // socket communbicating other data with js
+        // socket communicating other data with js
         memset(&sinJST, 0, sizeof(sinJST));
         sinJST.sin_family = AF_INET;
         sinJST.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -88,7 +90,11 @@ void openConnectionT()
         sinRemoteT.sin_family = AF_INET;
         sinRemoteT.sin_port = htons(RPORT_T);
 
-        //serving from BBG - very slow.7.1");
+        //serving from BBG - very slow
+        // sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.2"); 
+
+        // for serving from host
+        sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.1");
 
 
 
@@ -97,7 +103,15 @@ void openConnectionT()
         sinRemoteJST.sin_port = htons(RPORT_T);
 
         //serving from BBG - very slow
-        // sinRemoteT.sin_addr.s_addr = inet_addr("192.168.7.2"); 
+        // sinRemoteJST.sin_addr.s_addr = inet_addr("192.168.7.2"); 
+
+        // for serving from host
+        sinRemoteJST.sin_addr.s_addr = inet_addr("192.168.7.1");
+
+
+
+        // sending video to python
+        sinRemotePyT.sin_family = AF_INET;        
         sinRemotePyT.sin_port = htons(PYPORT_T);
 
         // serving from BBG - very slow
@@ -119,7 +133,7 @@ void openConnectionT()
         sinRemotePy2T.sin_addr.s_addr = inet_addr("192.168.7.1");
 }
 
-//Send video frame using udp packet
+//Send video frame using udp packet to nodejs
 int sendResponseT(const void *str, int size) 
 {
         int packetSent = 0;
@@ -133,7 +147,7 @@ int sendResponseT(const void *str, int size)
         return packetSent;
 }
 
-// Send video frame using udp packet
+// Send video frame using udp packet to python
 int sendResponsePyT(const void *str, int size) 
 {
         int packetSent = 0;
@@ -148,7 +162,7 @@ int sendResponsePyT(const void *str, int size)
         return packetSent;
 }
 
-// Send other commands using udp packet
+// Send other commands using udp packet to nodejs
 int sendResponseJST(const void *str, int size) 
 {
         int packetSent = 0;
@@ -167,130 +181,61 @@ int sendResponseJST(const void *str, int size)
 // recieve inference from python
 void getAnswer(void)
 {
-//         //Receive Data
-//     unsigned int sin_len = sizeof(sinRemotePyT);
-//     answer.bytesRx = recvfrom(socketDescriptorPyT, answer.messageRx, MAX_LEN -1, 0, (struct sockaddr *) &sinRemotePyT, &sin_len);
-// //     answer.messageRx[answer.bytesRx] = 0; //Null terminated (string)
-//     printf("%s\n", answer.messageRx);
-
-         //Receive Data from python
-    unsigned int sin_len = sizeof(sinRemotePy2T);
-    answer.bytesRx = recvfrom(socketDescriptorT, answer.messageRx, MAX_LEN -1, 0, (struct sockaddr *) &sinRemotePy2T, &sin_len);
-//     answer.messageRx[answer.bytesRx] = 0; //Null terminated (string)
-//     printf("%s\n", answer.messageRx);
-//     sendResponseJST(answer.messageRx, answer.bytesRx);
-
+        //Receive Data from python
+        unsigned int sin_len = sizeof(sinRemotePy2T);
+        answer.bytesRx = recvfrom(socketDescriptorT, answer.messageRx, MAX_LEN -1, 0, (struct sockaddr *) &sinRemotePy2T, &sin_len);
 }
 
-// recieve command from udp
+// recieve command from udp from nodejs
 void getUdpCommands(void)
 {
         unsigned int sin_len = sizeof(sinRemoteJST);
         command.bytesRx = recvfrom(socketDescriptorJST, command.messageRx, MAX_LEN -1, 0, (struct sockaddr *) &sinRemoteJST, &sin_len);
-        // answer.messageRx[answer.bytesRx] = 0; //Null terminated (string)
         printf("%s\n", command.messageRx);
 
-        if(strcmp(command.messageRx, "inference") == 0) {
-                // if (displayPosition < 16) {
+        if(strcmp(command.messageRx, "infer") == 0) {
                         getAnswer();
-                        // if(strcmp(answer.messageRx, "") != 0) {
                         pthread_mutex_lock(&displayMutex);
-                                displayString[displayPosition++] = answer.messageRx[0];
-                                displayString[displayPosition] = '\0';
-                                printf("%s\n", displayString);
-                                sendResponseJST(displayString, displayPosition);
-                                // lcd write message
+                                printf("%s\n", answer.messageRx);
                                 lcd_display(answer.messageRx[0]);
-                        pthread_mutex_unlock(&displayMutex);
-
-                        // }
-                        // else {
-                                
-                        // }
-                        
-                // }
+                                sendResponseJST(returnDisplayString(), returnDisplayPos());
+                        pthread_mutex_unlock(&displayMutex);     
+                }
                 
-        }  
-        if(strcmp(command.messageRx, "play") == 0) {
-                // play audio function
+}  
 
-                // play audio
-                displayString[0] = '\0';
-                displayPosition = 0;
-                // (void) system("aplay test.wav");
-        }
-        if(strcmp(command.messageRx, "clear") == 0) {
-                // clear text display
-                pthread_mutex_lock(&displayMutex);
-                        // displayString[0] = '\0';
-                        memset(displayString, 0, 1024 * sizeof(char));
-                        displayPosition = 0;
-                        lcd_clear();
-                pthread_mutex_unlock(&displayMutex);
-        }   
-        if(strcmp(command.messageRx, "off") == 0) {
-                // stop the whole system
-                running = false;
-
-        }
-        // sendResponseJST(command.messageRx, command.bytesRx);
-}
-
-//Close udp connection
+//Close all sockets
 void closeConnectionT()
 {
         close(socketDescriptorT);
+        close(socketDescriptorJST);
 }
 
-
+// thread controliing listening to nodejs
 void* listenUDPThread(void* args)
 {
         while(running) {
                 // getAnswer();
                 getUdpCommands();
         }  
-        // getAnswer();
         return args;
 }
 
+// start nodejs listening thread
 void listenUDPThread_init(void)
 {
         pthread_create(&udpThreadID, NULL, listenUDPThread, NULL);
 }
 
+// cleanup and clise the listeningf thread
 void listenUDPThread_cleanup(void)
 {
         running = false;
         pthread_join(udpThreadID, NULL);
 }
 
-// void* listenPyThread(void* args)
-// {
-//         while(running) {
-//                 getAnswer();
-//                 // getUdpCommands();
-//                 pthread_mutex_lock(&displayMutex);
-//                 for(int i = 0; answer.messageRx[i] != '\0'; i++) {
-//                         displayString[displayPosition++] = answer.messageRx[i];
-//                         lcd_display(answer.messageRx[i]);        
-//                 }
-//                 displayString[displayPosition] = '\0';
-//                 printf("%s\n", displayString);
-//                 pthread_mutex_unlock(&displayMutex);
-                
-//         }  
-//         // getAnswer();
-//         return args;
-// }
-
-// void listenPyThread_init(void)
-// {
-//         pthread_create(&pythonThreadID, NULL, listenPyThread, NULL);
-// }
-
-// void listenPyThread_cleanup(void)
-// {
-//         running = false;
-//         pthread_join(pythonThreadID, NULL);
-// }
+void udp_setRUnning(bool value)
+{
+        running = value;
+}
 

@@ -1,3 +1,7 @@
+
+// Source: adapted from Team Solar streaming Guide
+// https://opencoursehub.cs.sfu.ca/bfraser/grav-cms/cmpt433/links/files/2022-student-howtos/StreamingWebcamFromBeagleBoneToNodeJSServer.pdf
+
 const socket = io();
 socket.on("connect", (socket) => { //confirm connection with NodeJS server
     console.log("Connected");
@@ -5,6 +9,8 @@ socket.on("connect", (socket) => { //confirm connection with NodeJS server
 });
 
 $( document ).ready(function() {
+
+    // display video
     socket.on('canvas', function(data) {
         const canvas = $("#videostream");
         const context = canvas[0].getContext('2d');
@@ -17,31 +23,18 @@ $( document ).ready(function() {
         }
     });
 
-    window.setInterval(function() {sendCommandViaUDP("inference")}, 3000);
+    // constantly ask for inferences (every 0.5 seconds)
+    window.setInterval(function() {sendCommandViaUDP("infer")}, 500);
 
-    $('#play').click(function(){
-		sendCommandViaUDP("play");
-	});
-    $('#clear').click(function(){
-		sendCommandViaUDP("clear");
-	});
-    $('#off').click(function(){
-		sendCommandViaUDP("off");
-	});
-
+    // updating the display inference string
     socket.on('commandReply', function(data) {
         console.log(data);
 
-		// var results = data.split(' ');
-        // var current = document.getElementById('outputid');
-        // var output = current + results;
         var output = data.split(' ');
-        // $("#outputid").html(output);
         $("#outputid").val(output);
     });
 });
 
 function sendCommandViaUDP(message) {
 	socket.emit('daUdpCommand', message);
-    // console.log('daUdpCommand'+ message);
 };

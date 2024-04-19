@@ -1,3 +1,6 @@
+// Source: adapted from Team Solar streaming Guide
+// https://opencoursehub.cs.sfu.ca/bfraser/grav-cms/cmpt433/links/files/2022-student-howtos/StreamingWebcamFromBeagleBoneToNodeJSServer.pdf
+
 const express = require('express');
 const router = express.Router();
 const path = require('path');

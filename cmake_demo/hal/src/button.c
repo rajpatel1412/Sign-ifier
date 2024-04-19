@@ -1,4 +1,5 @@
 #include "hal/button.h"
+#include "../../app/include/udp_handler.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -32,10 +33,13 @@ void *buttonThread(void *arg) {
         
         if (values[RED][0] == '1') {
             //SHUTDOWN
+            udp_setRUnning(false);
             lcd_cleanup();
+            sendResponseJST(returnDisplayString(), returnDisplayPos());
         }
         if (values[BLUE][0] == '1') {
             lcd_clear();
+            sendResponseJST(returnDisplayString(), returnDisplayPos());
         }
         if (values[YELLOW][0] == '1') {
             runCommand("aplay test.wav");

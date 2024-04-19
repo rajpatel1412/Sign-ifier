@@ -10,33 +10,24 @@
 #include <stdlib.h>
 #include <time.h>
 
-// Lets the program wait for the specified number of milliseconds
-// For instance when waiting for the pins to be configured
-// from assignment documentation
-static void sleepForMs(long long delayInMs)
-{
-    const long long NS_PER_MS = 1000 * 1000;
-    const long long NS_PER_SECOND = 1000000000;
-    long long delayNs = delayInMs * NS_PER_MS;
-    int seconds = delayNs / NS_PER_SECOND;
-    int nanoseconds = delayNs % NS_PER_SECOND;
-    struct timespec reqDelay = {seconds, nanoseconds};
-    nanosleep(&reqDelay, (struct timespec *) NULL);
-}
 
 int main()
-{
+{       
+    // initialize     
+    capture_init();
+    listenUDPThread_init();
+    initializeLCD();
+    initializeButt();
 
-        initializeLCD();
-        capture_init();
-        initializeButt();
-        sleepForMs(1);
-        listenUDPThread_init();
-        // listenPyThread_init();
-        while(udp_isRunning()) {}
-        capture_cleanup();
-        listenUDPThread_cleanup();
+    // wait till stop is called
+    while(udp_isRunning()) {}
 
-        return 0;
+    // cleanup all devices
+    butt_cleanup();
+    lcd_cleanup();
+    listenUDPThread_cleanup();
+    capture_cleanup();
+
+    return 0;
 
 }
