@@ -36,14 +36,18 @@ labels_dict = {
     30: 'DEMO'
 }
 
-
+# initialize array for prediction confidences
 predictions = np.zeros(num_symbols)
 
+# establish connection for sending information to C
 sock = socket.socket(socket.AF_INET , socket.SOCK_DGRAM) 
 ip="192.168.7.2"   
 port=3000
 answer = 1
 
+# number of inferences to make before sending a result back.
+# num_inferences set to 20 means that one letter will be
+# sent every 5 seconds.
 num_inferences = 20
 
 cap = cv2.VideoCapture("udp://192.168.7.1:12345?overrun_nonfatal=1&fifo_size=50000000")   
@@ -51,9 +55,11 @@ cap = cv2.VideoCapture("udp://192.168.7.1:12345?overrun_nonfatal=1&fifo_size=500
 flag,frame = cap.read()
 
 while flag:
-
+# time the program, just for console output
     start = time.time()
     answer = answer + 1
+    # if cap.read() can't find a frame, stop inferring. That means
+    # that the program is done.
     if not flag:
         break
 
@@ -63,7 +69,7 @@ while flag:
         data_aux = []
         x_ = []
         y_ = []
-
+        # convert BGR footage to RGB for Mediapipe
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         results = hands.process(frame_rgb)
@@ -109,8 +115,10 @@ while flag:
 
     # send prediction to website
     message = labels_dict[index_max]
-
+    # if message is a recognized sign, send it via UDP
     if(message != '.'):
+        # We send character by character for the case of words.
+        # This may not be ideal, but is an easy way to handle sending words.
         for i in range(len(message)):            
             sock.sendto(str(message[i]).encode(), (ip,port))
 
