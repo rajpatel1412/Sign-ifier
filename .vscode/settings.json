@@ -1,7 +1,0 @@
-{
-    "cmake.sourceDirectory": "/home/raj/cmpt433/work/project/Sign-ifier/cmake_demo",
-    "files.associations": {
-        "time.h": "c",
-        "lcd.h": "c"
-    }
-}
