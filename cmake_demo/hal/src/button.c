@@ -38,12 +38,13 @@ void *buttonThread(void *arg) {
             sendResponseJST(returnDisplayString(), returnDisplayPos());
         }
         if (values[BLUE][0] == '1') {
+            //CLEAR LCD CHARACTERS
             lcd_clear();
             sendResponseJST(returnDisplayString(), returnDisplayPos());
         }
         if (values[YELLOW][0] == '1') {
+            //PLAY AUDIO
             runCommand("aplay test.wav");
-            printf("DEAD\n");
         }
     }
     return arg;

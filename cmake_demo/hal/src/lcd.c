@@ -93,8 +93,6 @@ void initializeLCD(void)
     GPIO_writeValue(D6_GPIO_NUMBER, "0");
     GPIO_writeValue(D7_GPIO_NUMBER, "0");
 
-    // printf("Configured pins...\n");
-
     // Set to command mode
     GPIO_writeValue(RS_GPIO_NUMBER, "0");
 
@@ -140,8 +138,6 @@ void initializeLCD(void)
 	write4Bits(0x0); /* 0000 */
 	write4Bits(0xC); /* 1111 */
 	delayFor(0, 64000); // 64 us
-
-    // printf("Completed initialization.\n");
 
 	// Pull RS up to write data.
 	GPIO_writeValue(RS_GPIO_NUMBER, "1");
